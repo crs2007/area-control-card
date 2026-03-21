@@ -1,0 +1,30 @@
+{
+  "editor": {
+    "section_room": "הגדרת חדר",
+    "area": "אזור",
+    "display_name": "שם תצוגה",
+    "navigation_path": "נתיב ניווט",
+    "section_appearance": "מראה",
+    "color_preset": "ערכת צבעים",
+    "background_mode": "רקע",
+    "gradient": "גרדיאנט מונפש",
+    "image": "תמונה מותאמת",
+    "image_url": "כתובת תמונה",
+    "section_presence": "חיישן נוכחות",
+    "no_sensor": "ללא",
+    "section_entities": "בקרת ישויות",
+    "pin_entity": "הצג בכרטיס",
+    "max_entities": "מקסימום 8 ישויות",
+    "section_advanced": "מתקדם",
+    "tap_action": "פעולת לחיצה",
+    "hold_action": "פעולת לחיצה ארוכה",
+    "double_tap_action": "פעולת לחיצה כפולה"
+  },
+  "card": {
+    "occupied": "תפוס",
+    "clear": "פנוי",
+    "unavailable": "לא זמין",
+    "unknown": "לא ידוע",
+    "no_area": "בחר אזור"
+  }
+}

@@ -1,0 +1,407 @@
+import { css } from 'lit';
+
+export const cardStyles = css`
+  :host {
+    --acc-primary: #0764fa;
+    --acc-accent: #8acdd7;
+    --acc-glow-active: rgba(138, 205, 215, 0.8);
+    --acc-glow-secondary: rgba(7, 100, 250, 0.3);
+    --acc-background-tint: rgba(7, 100, 250, 0.08);
+  }
+
+  .card {
+    position: relative;
+    min-height: 200px;
+    border-radius: 16px;
+    padding: 22px;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--ha-card-background, var(--card-background-color, #fff));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    box-sizing: border-box;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--acc-background-tint);
+    border-radius: 16px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .card.occupied {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08),
+      0 0 20px var(--acc-glow-secondary);
+    animation: borderGlow 2s ease-in-out infinite;
+  }
+
+  .info {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-self: stretch;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .room-name {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--acc-primary);
+    margin: 0;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .room-state {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--acc-primary);
+    opacity: 0.7;
+    margin-top: 4px;
+  }
+
+  .chips-container {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 36px);
+    gap: 6px;
+    justify-items: center;
+    align-content: start;
+    margin-inline-start: 12px;
+  }
+
+  /* Gradient blob background */
+  .gradient-blob {
+    position: absolute;
+    bottom: -20px;
+    inset-inline-start: -20px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--acc-accent) 0%, var(--acc-primary) 100%);
+    opacity: 0.25;
+    filter: blur(30px);
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .gradient-blob.animated {
+    animation: gradientShift 4s ease-in-out infinite;
+  }
+
+  /* Image background */
+  .image-background {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .image-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .image-background.animated img {
+    animation: imageBreathe 3s ease-in-out infinite;
+  }
+
+  .image-background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      var(--ha-card-background, var(--card-background-color, #fff)) 30%,
+      transparent 100%
+    );
+  }
+
+  /* Presence badge */
+  .presence-badge {
+    position: absolute;
+    top: 14px;
+    inset-inline-end: 14px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--acc-accent);
+    z-index: 2;
+    animation: presencePulse 1.5s ease-in-out infinite;
+  }
+
+  /* Entity chip */
+  .chip {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+  }
+
+  .chip.active {
+    background: var(--acc-primary);
+    box-shadow: 0 0 12px var(--acc-glow-active);
+    animation: chipGlow 2s ease-in-out infinite;
+  }
+
+  .chip.inactive {
+    background: rgba(128, 128, 128, 0.15);
+  }
+
+  .chip.unavailable {
+    background: rgba(128, 128, 128, 0.08);
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .chip ha-icon {
+    --mdc-icon-size: 20px;
+  }
+
+  .chip.active ha-icon {
+    color: #fff;
+  }
+
+  .chip.inactive ha-icon {
+    color: var(--primary-text-color, #333);
+    opacity: 0.6;
+  }
+
+  .chip.unavailable ha-icon {
+    color: var(--disabled-text-color, #999);
+  }
+
+  .chip.active .icon-spin {
+    animation: iconSpin 3s linear infinite;
+  }
+
+  /* Animations */
+  @keyframes borderGlow {
+    0%, 100% {
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08),
+        0 0 20px var(--acc-glow-secondary);
+    }
+    50% {
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08),
+        0 0 35px var(--acc-glow-secondary);
+    }
+  }
+
+  @keyframes chipGlow {
+    0%, 100% {
+      box-shadow: 0 0 12px var(--acc-glow-active);
+    }
+    50% {
+      box-shadow: 0 0 20px var(--acc-glow-active);
+    }
+  }
+
+  @keyframes gradientShift {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.25;
+    }
+    50% {
+      transform: translate(10px, -10px) scale(1.1);
+      opacity: 0.35;
+    }
+  }
+
+  @keyframes imageBreathe {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+  }
+
+  @keyframes presencePulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes iconSpin {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(360deg);
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .card.occupied,
+    .chip.active,
+    .gradient-blob.animated,
+    .image-background.animated img,
+    .presence-badge,
+    .chip.active .icon-spin {
+      animation: none !important;
+    }
+  }
+
+  /* Responsive */
+  @container (max-width: 300px) {
+    .chips-container {
+      grid-template-columns: 36px;
+    }
+
+    .gradient-blob {
+      width: 100px;
+      height: 100px;
+    }
+  }
+`;
+
+export const editorStyles = css`
+  .editor {
+    padding: 16px;
+  }
+
+  .editor h3 {
+    font-size: 14px;
+    font-weight: 500;
+    margin: 16px 0 8px;
+    color: var(--primary-text-color);
+  }
+
+  .editor h3:first-child {
+    margin-top: 0;
+  }
+
+  .color-swatches {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 8px 0;
+  }
+
+  .color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+    padding: 0;
+  }
+
+  .color-swatch:hover {
+    transform: scale(1.1);
+  }
+
+  .color-swatch.selected {
+    border-color: var(--primary-color);
+    transform: scale(1.15);
+  }
+
+  .entity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .entity-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: var(--secondary-background-color, rgba(0, 0, 0, 0.05));
+  }
+
+  .entity-row ha-icon {
+    --mdc-icon-size: 20px;
+    color: var(--secondary-text-color);
+    flex-shrink: 0;
+  }
+
+  .entity-row .entity-name {
+    flex: 1;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .entity-row .domain-badge {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--accent-color, #03a9f4);
+    color: #fff;
+    text-transform: capitalize;
+    flex-shrink: 0;
+  }
+
+  .entity-row .reorder-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .entity-row .reorder-buttons button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    font-size: 14px;
+    color: var(--secondary-text-color);
+  }
+
+  .max-warning {
+    font-size: 12px;
+    color: var(--error-color, #db4437);
+    margin-top: 4px;
+  }
+
+  .advanced-toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: var(--secondary-text-color);
+    margin-top: 16px;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+`;

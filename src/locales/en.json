@@ -1,0 +1,30 @@
+{
+  "editor": {
+    "section_room": "Room Setup",
+    "area": "Area",
+    "display_name": "Display Name",
+    "navigation_path": "Navigation Path",
+    "section_appearance": "Appearance",
+    "color_preset": "Color Theme",
+    "background_mode": "Background",
+    "gradient": "Animated Gradient",
+    "image": "Custom Image",
+    "image_url": "Image URL",
+    "section_presence": "Presence Sensor",
+    "no_sensor": "None",
+    "section_entities": "Entity Controls",
+    "pin_entity": "Show on card",
+    "max_entities": "Maximum 8 entities",
+    "section_advanced": "Advanced",
+    "tap_action": "Tap Action",
+    "hold_action": "Hold Action",
+    "double_tap_action": "Double Tap Action"
+  },
+  "card": {
+    "occupied": "Occupied",
+    "clear": "Clear",
+    "unavailable": "Unavailable",
+    "unknown": "Unknown",
+    "no_area": "Select an area"
+  }
+}
