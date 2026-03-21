@@ -3,9 +3,9 @@
 > A reusable, GUI-configurable Home Assistant custom Lovelace card for room/area control with HACS distribution.
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://github.com/hacs/integration)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/sharontab/area-control-card?style=for-the-badge)
-![GitHub Release Date](https://img.shields.io/github/release-date/sharontab/area-control-card?style=for-the-badge)
-![License](https://img.shields.io/github/license/sharontab/area-control-card?style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/crs2007/area-control-card?style=for-the-badge)
+![GitHub Release Date](https://img.shields.io/github/release-date/crs2007/area-control-card?style=for-the-badge)
+![License](https://img.shields.io/github/license/crs2007/area-control-card?style=for-the-badge)
 ![HA Version](https://img.shields.io/badge/HA-2023.4%2B-blue?style=for-the-badge&logo=homeassistant)
 
 ---
@@ -13,7 +13,7 @@
 **Area Control Card** gives any Home Assistant user a beautiful, interactive room control panel — configured entirely through the visual editor (GUI). Pick an area, and the card auto-discovers devices. Pick a color theme, and the entire card adapts. Pick a presence sensor, and the card comes alive when someone walks in. **Zero YAML required.**
 
 <!-- Add your card screenshot here -->
-<!-- ![Area Control Card](https://raw.githubusercontent.com/sharontab/area-control-card/main/images/card-preview.png) -->
+<!-- ![Area Control Card](https://raw.githubusercontent.com/crs2007/area-control-card/main/images/card-preview.png) -->
 
 ## Features
 
@@ -46,7 +46,7 @@
 
 ### Method 2 — Manual
 
-1. Download `area-control-card.js` from the [latest release](https://github.com/sharontab/area-control-card/releases).
+1. Download `area-control-card.js` from the [latest release](https://github.com/crs2007/area-control-card/releases).
 2. Copy the file to your `config/www/` folder.
 3. In Home Assistant go to **Settings > Dashboards > Resources** and add:
    - **URL:** `/local/area-control-card.js`
@@ -274,7 +274,7 @@ See [src/locales/translations/README.md](src/locales/translations/README.md) for
 
 ```bash
 # Clone the repository
-git clone https://github.com/sharontab/area-control-card.git
+git clone https://github.com/crs2007/area-control-card.git
 cd area-control-card
 
 # Install dependencies
@@ -309,4 +309,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute.
 
-If you find a bug or have a feature request, please [open an issue](https://github.com/sharontab/area-control-card/issues).
+If you find a bug or have a feature request, please [open an issue](https://github.com/crs2007/area-control-card/issues).
