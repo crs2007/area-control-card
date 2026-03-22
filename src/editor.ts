@@ -49,7 +49,7 @@ export class AreaControlCardEditor extends LitElement {
       <ha-select
         .label=${localize('editor.area', this._lang)}
         .value=${this._config.area || ''}
-        @selected=${this._areaChanged}
+        @change=${this._areaChanged}
         @closed=${(e: Event) => e.stopPropagation()}
         fixedMenuPosition
         naturalMenuWidth
@@ -98,7 +98,7 @@ export class AreaControlCardEditor extends LitElement {
       <ha-select
         .label=${localize('editor.background_mode', this._lang)}
         .value=${this._config.background_mode || 'gradient'}
-        @selected=${this._backgroundModeChanged}
+        @change=${this._backgroundModeChanged}
         @closed=${(e: Event) => e.stopPropagation()}
         fixedMenuPosition
         naturalMenuWidth
@@ -129,7 +129,7 @@ export class AreaControlCardEditor extends LitElement {
       <ha-select
         .label=${localize('editor.section_presence', this._lang)}
         .value=${this._config.presence_entity || ''}
-        @selected=${this._presenceChanged}
+        @change=${this._presenceChanged}
         @closed=${(e: Event) => e.stopPropagation()}
         fixedMenuPosition
         naturalMenuWidth
@@ -236,7 +236,7 @@ export class AreaControlCardEditor extends LitElement {
 
   // --- Event handlers ---
 
-  private _areaChanged(e: CustomEvent): void {
+  private _areaChanged(e: Event): void {
     const value = (e.target as HTMLSelectElement).value;
     this._updateConfig({ area: value || undefined, entities: [], presence_entity: undefined });
   }
@@ -253,7 +253,7 @@ export class AreaControlCardEditor extends LitElement {
     this._updateConfig({ color_preset: preset });
   }
 
-  private _backgroundModeChanged(e: CustomEvent): void {
+  private _backgroundModeChanged(e: Event): void {
     const value = (e.target as HTMLSelectElement).value as 'gradient' | 'image';
     this._updateConfig({ background_mode: value });
   }
@@ -262,7 +262,7 @@ export class AreaControlCardEditor extends LitElement {
     this._updateConfig({ image_url: (e.target as HTMLInputElement).value || undefined });
   }
 
-  private _presenceChanged(e: CustomEvent): void {
+  private _presenceChanged(e: Event): void {
     const value = (e.target as HTMLSelectElement).value;
     this._updateConfig({ presence_entity: value || undefined });
   }
