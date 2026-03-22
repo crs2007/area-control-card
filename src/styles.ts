@@ -305,6 +305,13 @@ export const editorStyles = css`
     margin-top: 0;
   }
 
+  .side-by-side {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
   .color-swatches {
     display: flex;
     gap: 8px;

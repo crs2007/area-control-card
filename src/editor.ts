@@ -41,25 +41,15 @@ export class AreaControlCardEditor extends LitElement {
   }
 
   private _renderRoomSection(): TemplateResult {
-    const areas = this.hass.areas ? Object.values(this.hass.areas) : [];
-
     return html`
       <h3>${localize('editor.section_room', this._lang)}</h3>
 
-      <ha-select
-        .label=${localize('editor.area', this._lang)}
+      <ha-area-picker
+        .hass=${this.hass}
         .value=${this._config.area || ''}
-        @change=${this._areaChanged}
-        @closed=${(e: Event) => e.stopPropagation()}
-        fixedMenuPosition
-        naturalMenuWidth
-      >
-        ${areas.map(
-          (area) => html`
-            <ha-list-item .value=${area.area_id}>${area.name}</ha-list-item>
-          `,
-        )}
-      </ha-select>
+        .label=${localize('editor.area', this._lang)}
+        @value-changed=${this._areaChanged}
+      ></ha-area-picker>
 
       <ha-textfield
         .label=${localize('editor.display_name', this._lang)}
@@ -95,17 +85,24 @@ export class AreaControlCardEditor extends LitElement {
         )}
       </div>
 
-      <ha-select
-        .label=${localize('editor.background_mode', this._lang)}
-        .value=${this._config.background_mode || 'gradient'}
-        @change=${this._backgroundModeChanged}
-        @closed=${(e: Event) => e.stopPropagation()}
-        fixedMenuPosition
-        naturalMenuWidth
-      >
-        <ha-list-item value="gradient">${localize('editor.gradient', this._lang)}</ha-list-item>
-        <ha-list-item value="image">${localize('editor.image', this._lang)}</ha-list-item>
-      </ha-select>
+      <div class="side-by-side">
+        <ha-formfield .label=${localize('editor.gradient', this._lang)}>
+          <ha-radio
+            name="background_mode"
+            value="gradient"
+            .checked=${(this._config.background_mode || 'gradient') === 'gradient'}
+            @change=${this._backgroundModeChanged}
+          ></ha-radio>
+        </ha-formfield>
+        <ha-formfield .label=${localize('editor.image', this._lang)}>
+          <ha-radio
+            name="background_mode"
+            value="image"
+            .checked=${this._config.background_mode === 'image'}
+            @change=${this._backgroundModeChanged}
+          ></ha-radio>
+        </ha-formfield>
+      </div>
 
       ${this._config.background_mode === 'image'
         ? html`
@@ -120,29 +117,21 @@ export class AreaControlCardEditor extends LitElement {
   }
 
   private _renderPresenceSection(): TemplateResult {
-    const areaId = this._config.area;
-    const sensors = areaId ? getPresenceSensors(this.hass, areaId) : [];
-
     return html`
       <h3>${localize('editor.section_presence', this._lang)}</h3>
 
-      <ha-select
-        .label=${localize('editor.section_presence', this._lang)}
+      <ha-entity-picker
+        .hass=${this.hass}
         .value=${this._config.presence_entity || ''}
-        @change=${this._presenceChanged}
-        @closed=${(e: Event) => e.stopPropagation()}
-        fixedMenuPosition
-        naturalMenuWidth
-      >
-        <ha-list-item value="">${localize('editor.no_sensor', this._lang)}</ha-list-item>
-        ${sensors.map(
-          (entityId) => html`
-            <ha-list-item .value=${entityId}>
-              ${getEntityName(this.hass, entityId)}
-            </ha-list-item>
-          `,
-        )}
-      </ha-select>
+        .label=${localize('editor.section_presence', this._lang)}
+        .includeDomains=${['binary_sensor']}
+        .entityFilter=${(entity: { entity_id: string; attributes?: { device_class?: string } }) => {
+          const dc = entity.attributes?.device_class;
+          return dc === 'occupancy' || dc === 'motion' || dc === 'presence';
+        }}
+        allow-custom-entity
+        @value-changed=${this._presenceChanged}
+      ></ha-entity-picker>
     `;
   }
 
@@ -236,8 +225,9 @@ export class AreaControlCardEditor extends LitElement {
 
   // --- Event handlers ---
 
-  private _areaChanged(e: Event): void {
-    const value = (e.target as HTMLSelectElement).value;
+  private _areaChanged(e: CustomEvent): void {
+    const value = e.detail?.value;
+    if (value === this._config.area) return;
     this._updateConfig({ area: value || undefined, entities: [], presence_entity: undefined });
   }
 
@@ -254,7 +244,8 @@ export class AreaControlCardEditor extends LitElement {
   }
 
   private _backgroundModeChanged(e: Event): void {
-    const value = (e.target as HTMLSelectElement).value as 'gradient' | 'image';
+    const value = (e.target as HTMLInputElement).value as 'gradient' | 'image';
+    if (value === this._config.background_mode) return;
     this._updateConfig({ background_mode: value });
   }
 
@@ -262,8 +253,8 @@ export class AreaControlCardEditor extends LitElement {
     this._updateConfig({ image_url: (e.target as HTMLInputElement).value || undefined });
   }
 
-  private _presenceChanged(e: Event): void {
-    const value = (e.target as HTMLSelectElement).value;
+  private _presenceChanged(e: CustomEvent): void {
+    const value = e.detail?.value;
     this._updateConfig({ presence_entity: value || undefined });
   }
 
