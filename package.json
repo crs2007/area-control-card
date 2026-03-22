@@ -1,6 +1,6 @@
 {
   "name": "area-control-card",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A reusable, GUI-configurable Home Assistant custom Lovelace card for room/area control",
   "main": "dist/area-control-card.js",
   "scripts": {

@@ -56,7 +56,7 @@ export class AreaControlCardEditor extends LitElement {
       >
         ${areas.map(
           (area) => html`
-            <mwc-list-item .value=${area.area_id}>${area.name}</mwc-list-item>
+            <ha-list-item .value=${area.area_id}>${area.name}</ha-list-item>
           `,
         )}
       </ha-select>
@@ -103,8 +103,8 @@ export class AreaControlCardEditor extends LitElement {
         fixedMenuPosition
         naturalMenuWidth
       >
-        <mwc-list-item value="gradient">${localize('editor.gradient', this._lang)}</mwc-list-item>
-        <mwc-list-item value="image">${localize('editor.image', this._lang)}</mwc-list-item>
+        <ha-list-item value="gradient">${localize('editor.gradient', this._lang)}</ha-list-item>
+        <ha-list-item value="image">${localize('editor.image', this._lang)}</ha-list-item>
       </ha-select>
 
       ${this._config.background_mode === 'image'
@@ -134,12 +134,12 @@ export class AreaControlCardEditor extends LitElement {
         fixedMenuPosition
         naturalMenuWidth
       >
-        <mwc-list-item value="">${localize('editor.no_sensor', this._lang)}</mwc-list-item>
+        <ha-list-item value="">${localize('editor.no_sensor', this._lang)}</ha-list-item>
         ${sensors.map(
           (entityId) => html`
-            <mwc-list-item .value=${entityId}>
+            <ha-list-item .value=${entityId}>
               ${getEntityName(this.hass, entityId)}
-            </mwc-list-item>
+            </ha-list-item>
           `,
         )}
       </ha-select>
