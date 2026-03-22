@@ -1,5 +1,6 @@
 {
   "name": "Area Control Card",
+  "type": "plugin",
   "render_readme": true,
   "filename": "area-control-card.js"
 }
