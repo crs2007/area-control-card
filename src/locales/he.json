@@ -18,7 +18,9 @@
     "section_advanced": "מתקדם",
     "tap_action": "פעולת לחיצה",
     "hold_action": "פעולת לחיצה ארוכה",
-    "double_tap_action": "פעולת לחיצה כפולה"
+    "double_tap_action": "פעולת לחיצה כפולה",
+    "card_icon": "אייקון כרטיס",
+    "visual_priority": "עדיפות: אייקון ← תמונת אזור ← כתובת תמונה ← גרדיאנט"
   },
   "card": {
     "occupied": "תפוס",

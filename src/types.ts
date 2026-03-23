@@ -27,6 +27,7 @@ export interface AreaControlCardConfig {
   color_preset: ColorPreset;
   background_mode: 'gradient' | 'image';
   image_url?: string;
+  card_icon?: string;
 
   // Presence
   presence_entity?: string;

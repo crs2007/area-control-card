@@ -11,9 +11,9 @@ export const cardStyles = css`
 
   .card {
     position: relative;
-    min-height: 200px;
+    min-height: 180px;
     border-radius: 16px;
-    padding: 22px;
+    padding: 20px;
     overflow: hidden;
     cursor: pointer;
     background: var(--ha-card-background, var(--card-background-color, #fff));
@@ -22,10 +22,10 @@ export const cardStyles = css`
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
     transition: box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr;
+    gap: 0;
     box-sizing: border-box;
   }
 
@@ -40,42 +40,46 @@ export const cardStyles = css`
   }
 
   .card.occupied {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08),
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.08),
       0 0 20px var(--acc-glow-secondary);
     animation: borderGlow 2s ease-in-out infinite;
   }
 
-  .info {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-self: stretch;
-    min-width: 0;
-    flex: 1;
-  }
-
   .room-name {
-    font-size: 18px;
-    font-weight: 500;
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 22px;
+    font-weight: 600;
     color: var(--acc-primary);
     margin: 0;
     line-height: 1.3;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    position: relative;
+    z-index: 1;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--acc-accent);
+    align-self: start;
   }
 
   .room-state {
-    font-size: 14px;
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 13px;
     font-weight: 400;
     color: var(--acc-primary);
     opacity: 0.7;
-    margin-top: 4px;
+    align-self: end;
+    justify-self: end;
+    position: relative;
+    z-index: 1;
   }
 
   .chips-container {
+    grid-column: 2;
+    grid-row: 1;
     position: relative;
     z-index: 1;
     display: grid;
@@ -106,36 +110,55 @@ export const cardStyles = css`
     animation: gradientShift 4s ease-in-out infinite;
   }
 
-  /* Image background */
-  .image-background {
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    overflow: hidden;
+  /* Bottom-left visual element (icon / image) */
+  .bottom-visual {
+    grid-column: 1;
+    grid-row: 2;
+    position: relative;
     z-index: 0;
+    align-self: end;
+    justify-self: start;
+    width: 110px;
+    height: 110px;
+    overflow: hidden;
     pointer-events: none;
   }
 
-  .image-background img {
+  .bottom-visual.icon-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.18;
+    color: var(--acc-primary);
+    transition: opacity 0.3s ease;
+  }
+
+  .bottom-visual.icon-visual ha-icon {
+    --mdc-icon-size: 90px;
+  }
+
+  .bottom-visual.icon-visual.animated {
+    animation: iconBreathe 3s ease-in-out infinite;
+  }
+
+  .bottom-visual.image-visual {
+    border-radius: 16px;
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+  }
+
+  .bottom-visual.image-visual img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    border-radius: 16px;
+    filter: saturate(0.5);
+    mask-image: radial-gradient(ellipse at bottom left, black 40%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse at bottom left, black 40%, transparent 70%);
   }
 
-  .image-background.animated img {
+  .bottom-visual.image-visual.animated img {
     animation: imageBreathe 3s ease-in-out infinite;
-  }
-
-  .image-background::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to right,
-      var(--ha-card-background, var(--card-background-color, #fff)) 30%,
-      transparent 100%
-    );
   }
 
   /* Presence badge */
@@ -162,7 +185,9 @@ export const cardStyles = css`
     cursor: pointer;
     border: none;
     padding: 0;
-    transition: background 0.2s ease, box-shadow 0.2s ease;
+    transition:
+      background 0.2s ease,
+      box-shadow 0.2s ease;
     position: relative;
   }
 
@@ -205,18 +230,22 @@ export const cardStyles = css`
 
   /* Animations */
   @keyframes borderGlow {
-    0%, 100% {
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08),
+    0%,
+    100% {
+      box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.08),
         0 0 20px var(--acc-glow-secondary);
     }
     50% {
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08),
+      box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.08),
         0 0 35px var(--acc-glow-secondary);
     }
   }
 
   @keyframes chipGlow {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow: 0 0 12px var(--acc-glow-active);
     }
     50% {
@@ -225,7 +254,8 @@ export const cardStyles = css`
   }
 
   @keyframes gradientShift {
-    0%, 100% {
+    0%,
+    100% {
       transform: translate(0, 0) scale(1);
       opacity: 0.25;
     }
@@ -235,8 +265,21 @@ export const cardStyles = css`
     }
   }
 
+  @keyframes iconBreathe {
+    0%,
+    100% {
+      opacity: 0.18;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.28;
+      transform: scale(1.05);
+    }
+  }
+
   @keyframes imageBreathe {
-    0%, 100% {
+    0%,
+    100% {
       transform: scale(1);
     }
     50% {
@@ -245,7 +288,8 @@ export const cardStyles = css`
   }
 
   @keyframes presencePulse {
-    0%, 100% {
+    0%,
+    100% {
       transform: scale(1);
       opacity: 1;
     }
@@ -269,7 +313,8 @@ export const cardStyles = css`
     .card.occupied,
     .chip.active,
     .gradient-blob.animated,
-    .image-background.animated img,
+    .bottom-visual.icon-visual.animated,
+    .bottom-visual.image-visual.animated img,
     .presence-badge,
     .chip.active .icon-spin {
       animation: none !important;
@@ -280,6 +325,15 @@ export const cardStyles = css`
   @container (max-width: 300px) {
     .chips-container {
       grid-template-columns: 36px;
+    }
+
+    .bottom-visual {
+      width: 80px;
+      height: 80px;
+    }
+
+    .bottom-visual.icon-visual ha-icon {
+      --mdc-icon-size: 60px;
     }
 
     .gradient-blob {
@@ -325,7 +379,9 @@ export const editorStyles = css`
     border-radius: 50%;
     border: 3px solid transparent;
     cursor: pointer;
-    transition: border-color 0.2s, transform 0.2s;
+    transition:
+      border-color 0.2s,
+      transform 0.2s;
     padding: 0;
   }
 

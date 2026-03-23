@@ -1,8 +1,19 @@
 import { LitElement, html, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { AreaControlCardConfig, HomeAssistant, EntityConfig } from './types';
-import { EDITOR_TAG, COLOR_PRESETS, MAX_ENTITIES, DOMAIN_ICONS, SUPPORTED_DOMAINS, DEFAULT_CONFIG } from './const';
-import { getAreaEntities, getAreaEntitiesByDomain, getPresenceSensors } from './utils/area-entities';
+import {
+  EDITOR_TAG,
+  COLOR_PRESETS,
+  MAX_ENTITIES,
+  DOMAIN_ICONS,
+  SUPPORTED_DOMAINS,
+  DEFAULT_CONFIG,
+} from './const';
+import {
+  getAreaEntities,
+  getAreaEntitiesByDomain,
+  getPresenceSensors,
+} from './utils/area-entities';
 import { getEntityName, getDomain, fireEvent } from './utils/ha-helpers';
 import { localize } from './utils/localize';
 import { editorStyles } from './styles';
@@ -31,10 +42,8 @@ export class AreaControlCardEditor extends LitElement {
 
     return html`
       <div class="editor">
-        ${this._renderRoomSection()}
-        ${this._renderAppearanceSection()}
-        ${this._renderPresenceSection()}
-        ${this._renderEntitiesSection()}
+        ${this._renderRoomSection()} ${this._renderAppearanceSection()}
+        ${this._renderPresenceSection()} ${this._renderEntitiesSection()}
         ${this._renderAdvancedSection()}
       </div>
     `;
@@ -85,34 +94,22 @@ export class AreaControlCardEditor extends LitElement {
         )}
       </div>
 
-      <div class="side-by-side">
-        <ha-formfield .label=${localize('editor.gradient', this._lang)}>
-          <ha-radio
-            name="background_mode"
-            value="gradient"
-            .checked=${(this._config.background_mode || 'gradient') === 'gradient'}
-            @change=${this._backgroundModeChanged}
-          ></ha-radio>
-        </ha-formfield>
-        <ha-formfield .label=${localize('editor.image', this._lang)}>
-          <ha-radio
-            name="background_mode"
-            value="image"
-            .checked=${this._config.background_mode === 'image'}
-            @change=${this._backgroundModeChanged}
-          ></ha-radio>
-        </ha-formfield>
-      </div>
+      <ha-icon-picker
+        .hass=${this.hass}
+        .value=${this._config.card_icon || ''}
+        .label=${localize('editor.card_icon', this._lang)}
+        @value-changed=${this._cardIconChanged}
+      ></ha-icon-picker>
 
-      ${this._config.background_mode === 'image'
-        ? html`
-            <ha-textfield
-              .label=${localize('editor.image_url', this._lang)}
-              .value=${this._config.image_url || ''}
-              @input=${this._imageUrlChanged}
-            ></ha-textfield>
-          `
-        : nothing}
+      <ha-textfield
+        .label=${localize('editor.image_url', this._lang)}
+        .value=${this._config.image_url || ''}
+        @input=${this._imageUrlChanged}
+      ></ha-textfield>
+
+      <p style="font-size: 12px; margin: 4px 0 0; color: var(--secondary-text-color);">
+        ${localize('editor.visual_priority', this._lang)}
+      </p>
     `;
   }
 
@@ -164,12 +161,25 @@ export class AreaControlCardEditor extends LitElement {
               ${pinnedEntities.map(
                 (entityConfig, index) => html`
                   <div class="entity-row">
-                    <ha-icon .icon=${entityConfig.icon || DOMAIN_ICONS[getDomain(entityConfig.entity)] || 'mdi:help-circle'}></ha-icon>
-                    <span class="entity-name">${entityConfig.name || getEntityName(this.hass, entityConfig.entity)}</span>
+                    <ha-icon
+                      .icon=${entityConfig.icon ||
+                      DOMAIN_ICONS[getDomain(entityConfig.entity)] ||
+                      'mdi:help-circle'}
+                    ></ha-icon>
+                    <span class="entity-name"
+                      >${entityConfig.name || getEntityName(this.hass, entityConfig.entity)}</span
+                    >
                     <span class="domain-badge">${getDomain(entityConfig.entity)}</span>
                     <div class="reorder-buttons">
-                      <button @click=${() => this._moveEntity(index, -1)} ?disabled=${index === 0}>▲</button>
-                      <button @click=${() => this._moveEntity(index, 1)} ?disabled=${index === pinnedEntities.length - 1}>▼</button>
+                      <button @click=${() => this._moveEntity(index, -1)} ?disabled=${index === 0}>
+                        ▲
+                      </button>
+                      <button
+                        @click=${() => this._moveEntity(index, 1)}
+                        ?disabled=${index === pinnedEntities.length - 1}
+                      >
+                        ▼
+                      </button>
                     </div>
                     <ha-icon-button @click=${() => this._unpinEntity(index)}>
                       <ha-icon icon="mdi:close"></ha-icon>
@@ -218,12 +228,14 @@ export class AreaControlCardEditor extends LitElement {
             <ha-textfield
               .label=${localize('editor.tap_action', this._lang)}
               .value=${this._config.tap_action?.action || 'navigate'}
-              @input=${(e: Event) => this._actionChanged('tap_action', (e.target as HTMLInputElement).value)}
+              @input=${(e: Event) =>
+                this._actionChanged('tap_action', (e.target as HTMLInputElement).value)}
             ></ha-textfield>
             <ha-textfield
               .label=${localize('editor.hold_action', this._lang)}
               .value=${this._config.hold_action?.action || 'more-info'}
-              @input=${(e: Event) => this._actionChanged('hold_action', (e.target as HTMLInputElement).value)}
+              @input=${(e: Event) =>
+                this._actionChanged('hold_action', (e.target as HTMLInputElement).value)}
             ></ha-textfield>
           `
         : nothing}
@@ -250,10 +262,9 @@ export class AreaControlCardEditor extends LitElement {
     this._updateConfig({ color_preset: preset });
   }
 
-  private _backgroundModeChanged(e: Event): void {
-    const value = (e.target as HTMLInputElement).value as 'gradient' | 'image';
-    if (value === this._config.background_mode) return;
-    this._updateConfig({ background_mode: value });
+  private _cardIconChanged(e: CustomEvent): void {
+    const value = e.detail?.value;
+    this._updateConfig({ card_icon: value || undefined });
   }
 
   private _imageUrlChanged(e: Event): void {

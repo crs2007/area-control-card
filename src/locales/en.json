@@ -18,7 +18,9 @@
     "section_advanced": "Advanced",
     "tap_action": "Tap Action",
     "hold_action": "Hold Action",
-    "double_tap_action": "Double Tap Action"
+    "double_tap_action": "Double Tap Action",
+    "card_icon": "Card Icon",
+    "visual_priority": "Priority: Icon → Area Picture → Image URL → Gradient"
   },
   "card": {
     "occupied": "Occupied",
