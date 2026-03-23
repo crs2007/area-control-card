@@ -51,7 +51,7 @@ export const cardStyles = css`
     grid-row: 1;
     font-size: 22px;
     font-weight: 600;
-    color: var(--acc-primary);
+    color: var(--primary-text-color);
     margin: 0;
     line-height: 1.3;
     overflow: hidden;
@@ -69,8 +69,7 @@ export const cardStyles = css`
     grid-row: 2;
     font-size: 13px;
     font-weight: 400;
-    color: var(--acc-primary);
-    opacity: 0.7;
+    color: var(--secondary-text-color, rgba(128, 128, 128, 0.9));
     align-self: end;
     justify-self: end;
     position: relative;
@@ -128,7 +127,7 @@ export const cardStyles = css`
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.18;
+    opacity: 0.30;
     color: var(--acc-primary);
     transition: opacity 0.3s ease;
   }
@@ -143,7 +142,7 @@ export const cardStyles = css`
 
   .bottom-visual.image-visual {
     border-radius: 16px;
-    opacity: 0.3;
+    opacity: 0.4;
     transition: opacity 0.3s ease;
   }
 
@@ -183,7 +182,8 @@ export const cardStyles = css`
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border: none;
+    border: 1.5px solid transparent;
+    box-sizing: border-box;
     padding: 0;
     transition:
       background 0.2s ease,
@@ -193,17 +193,21 @@ export const cardStyles = css`
 
   .chip.active {
     background: var(--acc-primary);
+    border-color: rgba(255, 255, 255, 0.15);
     box-shadow: 0 0 12px var(--acc-glow-active);
     animation: chipGlow 2s ease-in-out infinite;
   }
 
   .chip.inactive {
-    background: rgba(128, 128, 128, 0.15);
+    background: rgba(128, 128, 128, 0.25);
+    border-color: rgba(128, 128, 128, 0.3);
   }
 
   .chip.unavailable {
-    background: rgba(128, 128, 128, 0.08);
-    opacity: 0.5;
+    background: rgba(128, 128, 128, 0.18);
+    opacity: 0.6;
+    border-color: rgba(128, 128, 128, 0.25);
+    border-style: dashed;
     cursor: default;
   }
 
@@ -216,8 +220,8 @@ export const cardStyles = css`
   }
 
   .chip.inactive ha-icon {
-    color: var(--primary-text-color, #333);
-    opacity: 0.6;
+    color: var(--primary-text-color, #e1e1e1);
+    opacity: 0.75;
   }
 
   .chip.unavailable ha-icon {
@@ -268,11 +272,11 @@ export const cardStyles = css`
   @keyframes iconBreathe {
     0%,
     100% {
-      opacity: 0.18;
+      opacity: 0.30;
       transform: scale(1);
     }
     50% {
-      opacity: 0.28;
+      opacity: 0.40;
       transform: scale(1.05);
     }
   }

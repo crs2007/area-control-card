@@ -12,8 +12,7 @@
 
 **Area Control Card** gives any Home Assistant user a beautiful, interactive room control panel — configured entirely through the visual editor (GUI). Pick an area, and the card auto-discovers devices. Pick a color theme, and the entire card adapts. Pick a presence sensor, and the card comes alive when someone walks in. **Zero YAML required.**
 
-<!-- Add your card screenshot here -->
-<!-- ![Area Control Card](https://raw.githubusercontent.com/crs2007/area-control-card/main/images/card-preview.png) -->
+![Area Control Card Preview](images/card-preview.png)
 
 ## Features
 
@@ -26,6 +25,12 @@
 - **Responsive** — Works on mobile, tablet, desktop, and cast displays
 - **i18n Ready** — English and Hebrew included, easily extensible
 - **Lightweight** — Single JS file, no dependencies on other custom cards
+
+### Card States
+
+| Active (entities ON) | Inactive (entities OFF) | Occupied (presence detected) |
+|:---:|:---:|:---:|
+| ![Active state](images/card-active.png) | ![Inactive state](images/card-inactive.png) | ![Occupied state](images/card-occupied.png) |
 
 ---
 
@@ -66,6 +71,8 @@ The card is fully configurable from the Home Assistant visual editor. No YAML ne
 <summary>Click to show configuration details</summary>
 
 After adding the card to your dashboard, the visual editor provides five sections:
+
+![Visual Editor](images/visual-editor.png)
 
 ### Section 1 — Room Setup
 
@@ -123,15 +130,17 @@ Each entity domain gets a chip with tap-to-toggle and state-aware visuals:
 | `switch` | `mdi:power-plug` | Toggle on/off | Colored when on |
 | `media_player` | `mdi:television` | Toggle on/off | Colored when on |
 | `climate` | `mdi:thermometer` | Toggle on/off | Colored when on |
-| `cover` | `mdi:blinds` | Open/close | State-aware |
-| `lock` | `mdi:lock` | Lock/unlock | State-aware |
+| `cover` | `mdi:blinds` | Open/close | Colored when open |
+| `lock` | `mdi:lock` | Lock/unlock | Colored when locked |
 | `scene` | `mdi:palette` | Activate | One-shot |
 | `script` | `mdi:script-text` | Execute | One-shot |
 
 **Chip visual states:**
 - **Active (ON):** Colored background + white icon + glow animation
-- **Inactive (OFF):** Transparent background + muted icon
-- **Unavailable:** Greyed out + non-interactive
+- **Inactive (OFF):** Semi-transparent background + bordered chip + muted icon
+- **Unavailable:** Greyed out + dashed border + non-interactive
+
+![Entity Chips](images/entity-chips.png)
 
 </details>
 
@@ -143,6 +152,8 @@ Each entity domain gets a chip with tap-to-toggle and state-aware visuals:
 <summary>Click to show color presets</summary>
 
 Six built-in color presets are available, each adapting to HA dark and light modes:
+
+![Color Themes](images/color-themes.png)
 
 | Preset | Primary | Accent | Best For |
 |:---|:---|:---|:---|
@@ -163,6 +174,10 @@ Six built-in color presets are available, each adapting to HA dark and light mod
 <summary>Click to show presence features</summary>
 
 When a presence/motion sensor is configured and detects occupancy:
+
+| Clear | Occupied |
+|:---:|:---:|
+| ![Clear state](images/presence-clear.png) | ![Occupied state](images/presence-occupied.png) |
 
 | Feature | Occupied | Clear |
 |:---|:---|:---|
