@@ -85,14 +85,18 @@ ocean, sunset, forest, lavender, amber, slate — defined in `const.ts` with 5 c
 
 ## Release & Versioning Process
 
-### Version Format
-- CalVer format: `YYYY.MM.DD.Minor` (e.g., `2026.03.22.0`)
-- Minor starts at `0` and increments for multiple releases on the same day (e.g., `2026.03.22.1`)
+### Version Format — MUST BE ENFORCED
+- **CalVer format ONLY: `YYYY.MM.DD.Minor`** (e.g., `2026.03.23.0`)
+- NEVER use SemVer (e.g., `1.0.3`) or any other format — always use CalVer
+- Use today's actual date. Minor starts at `0` and increments for multiple releases on the same day (e.g., `2026.03.23.1`)
+- The version MUST be updated in ALL THREE files and they MUST match:
+  1. `src/const.ts` → `CARD_VERSION`
+  2. `package.json` → `version`
+  3. `hacs.json` → `version`
 
 ### How to release a new version
-1. Update `CARD_VERSION` in `src/const.ts` to the new CalVer version
-2. Update `version` in `package.json` to match
-3. Update `version` in `hacs.json` to match
+1. Update version to today's CalVer date in all three files listed above
+2. Build: `npm run build`
 3. Commit and push changes to `main`
 4. Create and push a git tag: `git tag v<version> && git push --tags`
 5. The `release.yml` GitHub Actions workflow automatically builds and creates a GitHub Release with `dist/area-control-card.js` attached

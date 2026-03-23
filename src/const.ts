@@ -2,7 +2,7 @@ import { ColorPalette, ColorPreset, AreaControlCardConfig } from './types';
 
 export const CARD_TAG = 'area-control-card';
 export const EDITOR_TAG = 'area-control-card-editor';
-export const CARD_VERSION = '2026.03.22.0';
+export const CARD_VERSION = '2026.03.23.0';
 
 export const MAX_ENTITIES = 8;
 
