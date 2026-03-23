@@ -80,16 +80,22 @@ ocean, sunset, forest, lavender, amber, slate — defined in `const.ts` with 5 c
 
 ## HACS Configuration
 
-- `hacs.json` in root: `{ "name": "Area Control Card", "render_readme": true, "filename": "area-control-card.js" }`
+- `hacs.json` in root: includes `name`, `type`, `render_readme`, `filename`, and `version` fields
 - CI triggers on push/PR to `main` branch
 
 ## Release & Versioning Process
 
+### Version Format
+- CalVer format: `YYYY.MM.DD.Minor` (e.g., `2026.03.22.0`)
+- Minor starts at `0` and increments for multiple releases on the same day (e.g., `2026.03.22.1`)
+
 ### How to release a new version
-1. Update `CARD_VERSION` in `src/const.ts` to match the new version
-2. Commit and push changes to `main`
-3. Create and push a git tag: `git tag v<version> && git push --tags`
-4. The `release.yml` GitHub Actions workflow automatically builds and creates a GitHub Release with `dist/area-control-card.js` attached
+1. Update `CARD_VERSION` in `src/const.ts` to the new CalVer version
+2. Update `version` in `package.json` to match
+3. Update `version` in `hacs.json` to match
+3. Commit and push changes to `main`
+4. Create and push a git tag: `git tag v<version> && git push --tags`
+5. The `release.yml` GitHub Actions workflow automatically builds and creates a GitHub Release with `dist/area-control-card.js` attached
 
 ### How HACS delivers updates to users
 - HACS periodically polls GitHub repos (every few hours) for new releases
@@ -98,7 +104,7 @@ ocean, sunset, forest, lavender, amber, slate — defined in `const.ts` with 5 c
 - After updating, users may need to clear browser cache / hard-refresh to load the new JS file
 
 ### Important
-- The git tag version (e.g., `v1.1.0`) and `CARD_VERSION` in `const.ts` must always match
+- The git tag version (e.g., `v2026.03.22.0`) and `CARD_VERSION` in `const.ts` must always match
 - The release asset filename must match `hacs.json` → `filename` (`area-control-card.js`)
 
 ## Testing

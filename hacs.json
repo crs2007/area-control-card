@@ -2,5 +2,6 @@
   "name": "Area Control Card",
   "type": "plugin",
   "render_readme": true,
-  "filename": "area-control-card.js"
+  "filename": "area-control-card.js",
+  "version": "2026.03.22.0"
 }
