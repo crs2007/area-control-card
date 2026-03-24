@@ -11,7 +11,7 @@ export const cardStyles = css`
 
   .card {
     position: relative;
-    min-height: 180px;
+    min-height: 230px;
     border-radius: 16px;
     padding: 20px;
     overflow: hidden;
@@ -89,17 +89,16 @@ export const cardStyles = css`
     margin-inline-start: 12px;
   }
 
-  /* Gradient blob background */
+  /* Gradient blob background (no icon/image fallback) */
   .gradient-blob {
     position: absolute;
     bottom: -20px;
     inset-inline-start: -20px;
     width: 140px;
-    height: 140px;
+    height: 130px;
     border-radius: 50%;
-    background: radial-gradient(circle, var(--acc-accent) 0%, var(--acc-primary) 100%);
-    opacity: 0.25;
-    filter: blur(30px);
+    background: radial-gradient(circle at 40% 60%, var(--acc-accent) 0%, var(--acc-primary) 100%);
+    opacity: 0.6;
     z-index: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -117,23 +116,26 @@ export const cardStyles = css`
     z-index: 0;
     align-self: end;
     justify-self: start;
-    width: 110px;
-    height: 110px;
-    overflow: hidden;
+    width: 140px;
+    height: 130px;
+    overflow: visible;
     pointer-events: none;
+    margin: 0 0 -20px -20px;
   }
 
   .bottom-visual.icon-visual {
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.30;
-    color: var(--acc-primary);
+    background: radial-gradient(circle at 40% 60%, var(--acc-accent), var(--acc-primary));
+    border-radius: 50%;
+    opacity: 0.95;
+    color: rgba(255, 255, 255, 0.95);
     transition: opacity 0.3s ease;
   }
 
   .bottom-visual.icon-visual ha-icon {
-    --mdc-icon-size: 90px;
+    --mdc-icon-size: 64px;
   }
 
   .bottom-visual.icon-visual.animated {
@@ -141,8 +143,9 @@ export const cardStyles = css`
   }
 
   .bottom-visual.image-visual {
-    border-radius: 16px;
-    opacity: 0.4;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 60%, var(--acc-accent), var(--acc-primary));
+    opacity: 0.95;
     transition: opacity 0.3s ease;
   }
 
@@ -150,10 +153,7 @@ export const cardStyles = css`
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 16px;
-    filter: saturate(0.5);
-    mask-image: radial-gradient(ellipse at bottom left, black 40%, transparent 70%);
-    -webkit-mask-image: radial-gradient(ellipse at bottom left, black 40%, transparent 70%);
+    border-radius: 50%;
   }
 
   .bottom-visual.image-visual.animated img {
@@ -261,23 +261,21 @@ export const cardStyles = css`
     0%,
     100% {
       transform: translate(0, 0) scale(1);
-      opacity: 0.25;
+      opacity: 0.6;
     }
     50% {
-      transform: translate(10px, -10px) scale(1.1);
-      opacity: 0.35;
+      transform: translate(5px, -5px) scale(1.06);
+      opacity: 0.75;
     }
   }
 
   @keyframes iconBreathe {
     0%,
     100% {
-      opacity: 0.30;
       transform: scale(1);
     }
     50% {
-      opacity: 0.40;
-      transform: scale(1.05);
+      transform: scale(1.06);
     }
   }
 
@@ -332,17 +330,17 @@ export const cardStyles = css`
     }
 
     .bottom-visual {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 90px;
     }
 
     .bottom-visual.icon-visual ha-icon {
-      --mdc-icon-size: 60px;
+      --mdc-icon-size: 48px;
     }
 
     .gradient-blob {
       width: 100px;
-      height: 100px;
+      height: 90px;
     }
   }
 `;
