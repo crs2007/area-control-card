@@ -20,7 +20,10 @@
     "hold_action": "פעולת לחיצה ארוכה",
     "double_tap_action": "פעולת לחיצה כפולה",
     "card_icon": "אייקון כרטיס",
-    "visual_priority": "עדיפות: אייקון ← תמונת אזור ← כתובת תמונה ← גרדיאנט"
+    "visual_priority": "עדיפות: אייקון ← תמונת אזור ← כתובת תמונה ← גרדיאנט",
+    "move_up": "הזז למעלה",
+    "move_down": "הזז למטה",
+    "unpin_entity": "הסר מהכרטיס"
   },
   "card": {
     "occupied": "תפוס",
@@ -29,5 +32,13 @@
     "unknown": "לא ידוע",
     "confirm_unlock": "לפתוח את הנעילה של",
     "no_area": "בחר אזור"
+  },
+  "preset": {
+    "ocean": "אוקיינוס",
+    "sunset": "שקיעה",
+    "forest": "יער",
+    "lavender": "לבנדר",
+    "amber": "ענבר",
+    "slate": "צפחה"
   }
 }

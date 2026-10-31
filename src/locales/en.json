@@ -20,7 +20,10 @@
     "hold_action": "Hold Action",
     "double_tap_action": "Double Tap Action",
     "card_icon": "Card Icon",
-    "visual_priority": "Priority: Icon → Area Picture → Image URL → Gradient"
+    "visual_priority": "Priority: Icon → Area Picture → Image URL → Gradient",
+    "move_up": "Move up",
+    "move_down": "Move down",
+    "unpin_entity": "Remove from card"
   },
   "card": {
     "occupied": "Occupied",
@@ -29,5 +32,13 @@
     "unknown": "Unknown",
     "confirm_unlock": "Unlock",
     "no_area": "Select an area"
+  },
+  "preset": {
+    "ocean": "Ocean",
+    "sunset": "Sunset",
+    "forest": "Forest",
+    "lavender": "Lavender",
+    "amber": "Amber",
+    "slate": "Slate"
   }
 }

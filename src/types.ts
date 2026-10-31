@@ -4,6 +4,8 @@ export interface ActionConfig {
   url_path?: string;
   service?: string;
   service_data?: Record<string, unknown>;
+  perform_action?: string;
+  data?: Record<string, unknown>;
   target?: Record<string, unknown>;
   confirmation?: boolean;
 }

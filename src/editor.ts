@@ -19,6 +19,12 @@ import { localize } from './utils/localize';
 import { editorStyles } from './styles';
 import type { ColorPreset } from './types';
 
+const ACTION_SCHEMA = [
+  { name: 'tap_action', selector: { ui_action: {} } },
+  { name: 'hold_action', selector: { ui_action: {} } },
+  { name: 'double_tap_action', selector: { ui_action: {} } },
+];
+
 @customElement(EDITOR_TAG)
 export class AreaControlCardEditor extends LitElement {
   static styles = editorStyles;
@@ -88,7 +94,9 @@ export class AreaControlCardEditor extends LitElement {
               class="color-swatch ${this._config.color_preset === preset ? 'selected' : ''}"
               style="background: ${COLOR_PRESETS[preset].primary}"
               @click=${() => this._presetChanged(preset)}
-              title=${preset}
+              title=${localize(`preset.${preset}`, this._lang)}
+              aria-label=${localize(`preset.${preset}`, this._lang)}
+              aria-pressed=${String(this._config.color_preset === preset)}
             ></button>
           `,
         )}
@@ -171,17 +179,25 @@ export class AreaControlCardEditor extends LitElement {
                     >
                     <span class="domain-badge">${getDomain(entityConfig.entity)}</span>
                     <div class="reorder-buttons">
-                      <button @click=${() => this._moveEntity(index, -1)} ?disabled=${index === 0}>
+                      <button
+                        @click=${() => this._moveEntity(index, -1)}
+                        ?disabled=${index === 0}
+                        aria-label=${localize('editor.move_up', this._lang)}
+                      >
                         ▲
                       </button>
                       <button
                         @click=${() => this._moveEntity(index, 1)}
                         ?disabled=${index === pinnedEntities.length - 1}
+                        aria-label=${localize('editor.move_down', this._lang)}
                       >
                         ▼
                       </button>
                     </div>
-                    <ha-icon-button @click=${() => this._unpinEntity(index)}>
+                    <ha-icon-button
+                      .label=${localize('editor.unpin_entity', this._lang)}
+                      @click=${() => this._unpinEntity(index)}
+                    >
                       <ha-icon icon="mdi:close"></ha-icon>
                     </ha-icon-button>
                   </div>
@@ -203,6 +219,7 @@ export class AreaControlCardEditor extends LitElement {
                   <span class="entity-name">${getEntityName(this.hass, entityId)}</span>
                   <span class="domain-badge">${domain}</span>
                   <ha-icon-button
+                    .label=${localize('editor.pin_entity', this._lang)}
                     @click=${() => this._pinEntity(entityId)}
                     ?disabled=${pinnedEntities.length >= MAX_ENTITIES}
                   >
@@ -225,18 +242,14 @@ export class AreaControlCardEditor extends LitElement {
 
       ${this._showAdvanced
         ? html`
-            <ha-textfield
-              .label=${localize('editor.tap_action', this._lang)}
-              .value=${this._config.tap_action?.action || 'navigate'}
-              @input=${(e: Event) =>
-                this._actionChanged('tap_action', (e.target as HTMLInputElement).value)}
-            ></ha-textfield>
-            <ha-textfield
-              .label=${localize('editor.hold_action', this._lang)}
-              .value=${this._config.hold_action?.action || 'more-info'}
-              @input=${(e: Event) =>
-                this._actionChanged('hold_action', (e.target as HTMLInputElement).value)}
-            ></ha-textfield>
+            <ha-form
+              .hass=${this.hass}
+              .data=${this._config}
+              .schema=${ACTION_SCHEMA}
+              .computeLabel=${(item: { name: string }) =>
+                localize(`editor.${item.name}`, this._lang)}
+              @value-changed=${this._actionsChanged}
+            ></ha-form>
           `
         : nothing}
     `;
@@ -297,8 +310,14 @@ export class AreaControlCardEditor extends LitElement {
     this._updateConfig({ entities });
   }
 
-  private _actionChanged(key: string, value: string): void {
-    this._updateConfig({ [key]: { action: value } });
+  private _actionsChanged(e: CustomEvent): void {
+    const value = e.detail?.value as Partial<AreaControlCardConfig> | undefined;
+    if (!value) return;
+    this._updateConfig({
+      tap_action: value.tap_action,
+      hold_action: value.hold_action,
+      double_tap_action: value.double_tap_action,
+    });
   }
 
   private _updateConfig(updates: Partial<AreaControlCardConfig>): void {

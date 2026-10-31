@@ -15,12 +15,13 @@ import {
   isEntityActive,
   isEntityUnavailable,
   toggleEntity,
-  navigate,
   fireEvent,
 } from './utils/ha-helpers';
 import { getAreaEntitiesByDomain } from './utils/area-entities';
 import { localize } from './utils/localize';
 import { normalizeConfig } from './utils/config';
+import { ActionKind, ResolvedActions, hasAnyAction, resolveActions } from './utils/actions';
+import { ActionGesture } from './utils/action-gesture';
 import { cardStyles } from './styles';
 
 // Register editor as side effect
@@ -39,6 +40,17 @@ export class AreaControlCard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: AreaControlCardConfig;
 
+  private _actions!: ResolvedActions;
+  private _gesture = new ActionGesture(
+    (kind) => this._runAction(kind),
+    (kind) => this._actions?.[`${kind}_action`]?.action !== 'none',
+  );
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this._gesture.dispose();
+  }
+
   public static getConfigElement(): HTMLElement {
     return document.createElement(EDITOR_TAG);
   }
@@ -54,6 +66,7 @@ export class AreaControlCard extends LitElement {
 
   public setConfig(config: Partial<AreaControlCardConfig>): void {
     this._config = normalizeConfig(config);
+    this._actions = resolveActions(this._config);
   }
 
   public getCardSize(): number {
@@ -104,12 +117,39 @@ export class AreaControlCard extends LitElement {
       entities = discovered;
     }
 
+    // Entity-less actions (navigate) work as configured; more-info falls back to what is shown
+    this._actions = resolveActions(this._config, entities[0]?.entity);
+    const clickable = hasAnyAction(this._actions);
+
     return html`
       <ha-card>
-        <div class="card ${isOccupied ? 'occupied' : ''}" @click=${this._handleCardClick}>
-          ${isOccupied ? html`<div class="presence-badge"></div>` : nothing}
+        <div
+          class="card ${isOccupied ? 'occupied' : ''} ${clickable ? 'clickable' : ''}"
+          role=${clickable ? 'button' : nothing}
+          tabindex=${clickable ? '0' : nothing}
+          aria-label=${clickable ? roomName : nothing}
+          @pointerdown=${() => this._gesture.down()}
+          @pointerup=${() => this._gesture.up()}
+          @pointerleave=${() => this._gesture.cancel()}
+          @pointercancel=${() => this._gesture.cancel()}
+          @contextmenu=${(e: Event) =>
+            this._actions.hold_action.action !== 'none' && e.preventDefault()}
+          @keydown=${this._handleKeyDown}
+        >
+          ${isOccupied
+            ? html`<div
+                class="presence-badge"
+                role="img"
+                aria-label=${localize('card.occupied', lang)}
+              ></div>`
+            : nothing}
           <div class="room-name">${roomName}</div>
-          <div class="chips-container">
+          <div
+            class="chips-container"
+            @pointerdown=${(e: Event) => e.stopPropagation()}
+            @pointerup=${(e: Event) => e.stopPropagation()}
+            @keydown=${(e: Event) => e.stopPropagation()}
+          >
             ${entities.map((entityConfig) => this._renderChip(entityConfig))}
           </div>
           ${this._renderBottomVisual(area, isOccupied)}
@@ -171,6 +211,9 @@ export class AreaControlCard extends LitElement {
       DOMAIN_ICONS[domain] ||
       'mdi:help-circle';
     const chipClass = unavailable ? 'unavailable' : active ? 'active' : 'inactive';
+    const label =
+      entityConfig.name || (stateObj?.attributes.friendly_name as string) || entityConfig.entity;
+    const oneShot = ['scene', 'script', 'button', 'input_button'].includes(domain);
 
     // Spin fan icon when active
     const shouldSpin = active && domain === 'fan';
@@ -179,9 +222,10 @@ export class AreaControlCard extends LitElement {
       <button
         class="chip ${chipClass}"
         @click=${(e: Event) => this._handleChipClick(e, entityConfig.entity)}
-        title=${entityConfig.name ||
-        (stateObj?.attributes.friendly_name as string) ||
-        entityConfig.entity}
+        title=${label}
+        aria-label=${label}
+        aria-pressed=${oneShot ? nothing : String(active)}
+        ?disabled=${unavailable}
       >
         <ha-icon class=${shouldSpin ? 'icon-spin' : ''} .icon=${icon}></ha-icon>
       </button>
@@ -201,21 +245,26 @@ export class AreaControlCard extends LitElement {
     toggleEntity(this.hass, entityId);
   }
 
-  private _handleCardClick(): void {
-    const action = this._config.tap_action;
-    if (!action) return;
-
-    if (action.action === 'navigate') {
-      const path =
-        this._config.navigation_path || (action as { navigation_path?: string }).navigation_path;
-      if (path) {
-        navigate(path);
-      }
-    } else if (action.action === 'more-info' && this._config.entities?.length > 0) {
-      fireEvent(this, 'hass-more-info', {
-        entityId: this._config.entities[0].entity,
-      });
+  private _handleKeyDown(e: KeyboardEvent): void {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this._gesture.key();
     }
+  }
+
+  private _runAction(kind: ActionKind): void {
+    const action = this._actions[`${kind}_action`];
+    if (action.action === 'none') return;
+    // Let the HA frontend execute the action (navigate, more-info, perform-action, url, ...)
+    fireEvent(this, 'hass-action', {
+      config: {
+        entity: this._actions.entity,
+        tap_action: this._actions.tap_action,
+        hold_action: this._actions.hold_action,
+        double_tap_action: this._actions.double_tap_action,
+      },
+      action: kind,
+    });
   }
 }
 

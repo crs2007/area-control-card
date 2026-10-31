@@ -15,7 +15,6 @@ export const cardStyles = css`
     border-radius: 16px;
     padding: 20px;
     overflow: hidden;
-    cursor: pointer;
     background: var(--ha-card-background, var(--card-background-color, #fff));
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -27,6 +26,19 @@ export const cardStyles = css`
     grid-template-rows: auto 1fr;
     gap: 0;
     box-sizing: border-box;
+  }
+
+  .card.clickable {
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .card:focus-visible,
+  .chip:focus-visible {
+    outline: 2px solid var(--acc-accent);
+    outline-offset: 2px;
   }
 
   .card::before {
@@ -389,6 +401,13 @@ export const editorStyles = css`
 
   .color-swatch:hover {
     transform: scale(1.1);
+  }
+
+  .color-swatch:focus-visible,
+  .reorder-buttons button:focus-visible,
+  .advanced-toggle:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
   }
 
   .color-swatch.selected {
