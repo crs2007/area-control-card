@@ -1,44 +1,27 @@
-import * as en from '../locales/en.json';
+import en from '../locales/en.json';
+import he from '../locales/he.json';
 
-const translations: Record<string, Record<string, Record<string, string>>> = {
-  en: en as Record<string, Record<string, string>>,
-};
+type Translations = Record<string, Record<string, string>>;
 
-let loadedLanguages: Set<string> = new Set(['en']);
+// All locales are bundled statically: Rollup cannot resolve variable dynamic imports,
+// and the files are tiny. To add a language, import it here and register it below.
+export const translations: Record<string, Translations> = { en, he };
 
-async function loadLanguage(lang: string): Promise<void> {
-  if (loadedLanguages.has(lang)) return;
-
-  try {
-    const module = await import(`../locales/${lang}.json`);
-    translations[lang] = module.default || module;
-    loadedLanguages.add(lang);
-  } catch {
-    // Language not available, fall back to English
-  }
+function resolveLanguage(lang: string): string {
+  const normalized = (lang || 'en').toLowerCase().replace('_', '-');
+  if (translations[normalized]) return normalized;
+  const base = normalized.split('-')[0];
+  return translations[base] ? base : 'en';
 }
 
-export function localize(key: string, lang: string = 'en'): string {
-  // Try to load language async (will be available on next render)
-  if (!loadedLanguages.has(lang)) {
-    loadLanguage(lang);
-  }
-
+export function localize(key: string, lang = 'en'): string {
   const parts = key.split('.');
   if (parts.length !== 2) return key;
-
   const [section, field] = parts;
 
-  // Try requested language first, then fall back to English
-  const langTranslations = translations[lang];
-  if (langTranslations?.[section]?.[field]) {
-    return langTranslations[section][field];
-  }
-
-  const enTranslations = translations.en;
-  if (enTranslations?.[section]?.[field]) {
-    return enTranslations[section][field];
-  }
-
-  return key;
+  return (
+    translations[resolveLanguage(lang)]?.[section]?.[field] ??
+    translations.en?.[section]?.[field] ??
+    key
+  );
 }
