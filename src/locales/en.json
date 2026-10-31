@@ -27,6 +27,7 @@
     "clear": "Clear",
     "unavailable": "Unavailable",
     "unknown": "Unknown",
+    "confirm_unlock": "Unlock",
     "no_area": "Select an area"
   }
 }

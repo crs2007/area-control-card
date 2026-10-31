@@ -1,7 +1,14 @@
 import { LitElement, html, nothing, PropertyValues, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { AreaControlCardConfig, HomeAssistant } from './types';
-import { CARD_TAG, EDITOR_TAG, CARD_VERSION, DEFAULT_CONFIG, DOMAIN_ICONS } from './const';
+import {
+  CARD_TAG,
+  EDITOR_TAG,
+  CARD_VERSION,
+  DEFAULT_CONFIG,
+  DOMAIN_ICONS,
+  MAX_ENTITIES,
+} from './const';
 import { applyColorVariables } from './utils/colors';
 import {
   getDomain,
@@ -11,7 +18,9 @@ import {
   navigate,
   fireEvent,
 } from './utils/ha-helpers';
+import { getAreaEntitiesByDomain } from './utils/area-entities';
 import { localize } from './utils/localize';
+import { normalizeConfig } from './utils/config';
 import { cardStyles } from './styles';
 
 // Register editor as side effect
@@ -44,14 +53,7 @@ export class AreaControlCard extends LitElement {
   }
 
   public setConfig(config: Partial<AreaControlCardConfig>): void {
-    if (!config) {
-      throw new Error('Invalid configuration');
-    }
-
-    this._config = {
-      ...DEFAULT_CONFIG,
-      ...config,
-    } as AreaControlCardConfig;
+    this._config = normalizeConfig(config);
   }
 
   public getCardSize(): number {
@@ -86,7 +88,21 @@ export class AreaControlCard extends LitElement {
       stateText = isOccupied ? localize('card.occupied', lang) : localize('card.clear', lang);
     }
 
-    const entities = this._config.entities || [];
+    let entities = this._config.entities || [];
+
+    // Auto-discover entities from area when none are manually pinned
+    if (entities.length === 0 && areaId) {
+      const grouped = getAreaEntitiesByDomain(this.hass, areaId);
+      const discovered: { entity: string }[] = [];
+      for (const entityIds of Object.values(grouped)) {
+        for (const entityId of entityIds) {
+          if (discovered.length >= MAX_ENTITIES) break;
+          discovered.push({ entity: entityId });
+        }
+        if (discovered.length >= MAX_ENTITIES) break;
+      }
+      entities = discovered;
+    }
 
     return html`
       <ha-card>
@@ -176,6 +192,12 @@ export class AreaControlCard extends LitElement {
     e.stopPropagation();
     const stateObj = this.hass.states[entityId];
     if (isEntityUnavailable(stateObj)) return;
+    // Unlocking is security-sensitive: require explicit confirmation
+    if (getDomain(entityId) === 'lock' && stateObj.state === 'locked') {
+      const lang = this.hass.language || 'en';
+      const name = (stateObj.attributes.friendly_name as string) || entityId;
+      if (!window.confirm(`${localize('card.confirm_unlock', lang)} ${name}?`)) return;
+    }
     toggleEntity(this.hass, entityId);
   }
 
@@ -205,5 +227,5 @@ export class AreaControlCard extends LitElement {
   name: 'Area Control Card',
   description: 'A beautiful, interactive room control panel with area auto-discovery',
   preview: true,
-  documentationURL: 'https://github.com/area-control-card',
+  documentationURL: 'https://github.com/crs2007/area-control-card',
 });
