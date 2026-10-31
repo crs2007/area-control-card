@@ -14,70 +14,83 @@ export function getEntityName(hass: HomeAssistant, entityId: string): string {
   return entityId;
 }
 
+const MEDIA_PLAYER_INACTIVE = ['off', 'standby', 'idle', 'unavailable', 'unknown'];
+// MediaPlayerEntityFeature.TURN_ON | TURN_OFF
+const MEDIA_PLAYER_POWER_FEATURES = 128 | 256;
+
 export function isEntityActive(stateObj: HassEntity): boolean {
   const domain = getDomain(stateObj.entity_id);
 
   switch (domain) {
-    case 'light':
-    case 'fan':
-    case 'switch':
     case 'media_player':
-    case 'script':
-      return stateObj.state === 'on';
+      return !MEDIA_PLAYER_INACTIVE.includes(stateObj.state);
     case 'climate':
-      return stateObj.state !== 'off' && stateObj.state !== 'unavailable';
+      return !['off', 'unavailable', 'unknown'].includes(stateObj.state);
     case 'cover':
-      return stateObj.state === 'open';
+      return stateObj.state === 'open' || stateObj.state === 'opening';
     case 'lock':
       return stateObj.state === 'locked';
     case 'scene':
-      return false; // Scenes don't have active/inactive
+    case 'button':
+    case 'input_button':
+      return false; // One-shot entities have no active state
     default:
       return stateObj.state === 'on';
   }
 }
 
+/** Only a missing or `unavailable` entity is non-interactive; `unknown` is valid (e.g. unused scenes). */
 export function isEntityUnavailable(stateObj: HassEntity | undefined): boolean {
-  return !stateObj || stateObj.state === 'unavailable' || stateObj.state === 'unknown';
+  return !stateObj || stateObj.state === 'unavailable';
 }
 
-export function toggleEntity(hass: HomeAssistant, entityId: string): void {
+export async function toggleEntity(hass: HomeAssistant, entityId: string): Promise<void> {
   const domain = getDomain(entityId);
   const stateObj = hass.states[entityId];
   if (!stateObj) return;
 
-  switch (domain) {
-    case 'light':
-    case 'fan':
-    case 'switch':
-    case 'media_player':
-      hass.callService(domain, 'toggle', {}, { entity_id: entityId });
-      break;
-    case 'climate':
-      if (stateObj.state === 'off') {
-        hass.callService(domain, 'turn_on', {}, { entity_id: entityId });
-      } else {
-        hass.callService(domain, 'turn_off', {}, { entity_id: entityId });
+  const call = (service: string, callDomain = domain) =>
+    hass.callService(callDomain, service, {}, { entity_id: entityId });
+
+  try {
+    switch (domain) {
+      case 'media_player': {
+        const features = Number(stateObj.attributes.supported_features ?? 0);
+        await (features & MEDIA_PLAYER_POWER_FEATURES ? call('toggle') : call('media_play_pause'));
+        break;
       }
-      break;
-    case 'cover':
-      if (stateObj.state === 'open') {
-        hass.callService(domain, 'close_cover', {}, { entity_id: entityId });
-      } else {
-        hass.callService(domain, 'open_cover', {}, { entity_id: entityId });
-      }
-      break;
-    case 'lock':
-      if (stateObj.state === 'locked') {
-        hass.callService(domain, 'unlock', {}, { entity_id: entityId });
-      } else {
-        hass.callService(domain, 'lock', {}, { entity_id: entityId });
-      }
-      break;
-    case 'scene':
-    case 'script':
-      hass.callService(domain, 'turn_on', {}, { entity_id: entityId });
-      break;
+      case 'climate':
+        await call(stateObj.state === 'off' ? 'turn_on' : 'turn_off');
+        break;
+      case 'cover':
+        if (stateObj.state === 'opening' || stateObj.state === 'closing') {
+          await call('stop_cover');
+        } else {
+          await call(stateObj.state === 'open' ? 'close_cover' : 'open_cover');
+        }
+        break;
+      case 'lock':
+        await call(stateObj.state === 'locked' ? 'unlock' : 'lock');
+        break;
+      case 'scene':
+      case 'script':
+        await call('turn_on');
+        break;
+      case 'button':
+      case 'input_button':
+        await call('press');
+        break;
+      case 'light':
+      case 'fan':
+      case 'switch':
+        await call('toggle');
+        break;
+      default:
+        // input_boolean, humidifier, siren, vacuum, ...
+        await call('toggle', 'homeassistant');
+    }
+  } catch (err) {
+    console.error(`[area-control-card] Failed to toggle ${entityId}`, err);
   }
 }
 
