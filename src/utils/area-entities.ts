@@ -1,51 +1,47 @@
 import { HomeAssistant } from '../types';
-import { SUPPORTED_DOMAINS } from '../const';
+import { SUPPORTED_DOMAINS, PRESENCE_DEVICE_CLASSES } from '../const';
+import { getDomain } from './ha-helpers';
 
 export function getAreaEntities(hass: HomeAssistant, areaId: string): string[] {
-  // Get devices in this area
-  const deviceIds = Object.values(hass.devices)
-    .filter((d) => d.area_id === areaId)
-    .map((d) => d.id);
-
-  // Get entities: either directly assigned to area OR belonging to a device in area
-  const entityEntries = Object.values(hass.entities).filter(
-    (e) =>
-      !e.disabled_by &&
-      !e.hidden_by &&
-      (e.area_id === areaId || (e.device_id && deviceIds.includes(e.device_id))),
+  const deviceIds = new Set(
+    Object.values(hass.devices)
+      .filter((d) => d.area_id === areaId)
+      .map((d) => d.id),
   );
 
-  return entityEntries.map((e) => e.entity_id);
+  return Object.values(hass.entities)
+    .filter((e) => {
+      if (e.disabled_by || e.hidden_by || e.entity_category) return false;
+      // An entity's own area overrides the area of its device
+      if (e.area_id) return e.area_id === areaId;
+      return !!e.device_id && deviceIds.has(e.device_id);
+    })
+    .map((e) => e.entity_id);
 }
 
 export function getAreaEntitiesByDomain(
   hass: HomeAssistant,
   areaId: string,
 ): Record<string, string[]> {
-  const entities = getAreaEntities(hass, areaId);
   const grouped: Record<string, string[]> = {};
 
-  for (const entityId of entities) {
-    const domain = entityId.split('.')[0];
+  for (const entityId of getAreaEntities(hass, areaId)) {
+    const domain = getDomain(entityId);
     if (SUPPORTED_DOMAINS.includes(domain)) {
-      if (!grouped[domain]) {
-        grouped[domain] = [];
-      }
-      grouped[domain].push(entityId);
+      (grouped[domain] ||= []).push(entityId);
     }
   }
 
   return grouped;
 }
 
-export function getPresenceSensors(hass: HomeAssistant, areaId: string): string[] {
-  const entities = getAreaEntities(hass, areaId);
+export function isPresenceSensor(attributes: { device_class?: unknown } | undefined): boolean {
+  return PRESENCE_DEVICE_CLASSES.includes(attributes?.device_class as string);
+}
 
-  return entities.filter((entityId) => {
+export function getPresenceSensors(hass: HomeAssistant, areaId: string): string[] {
+  return getAreaEntities(hass, areaId).filter((entityId) => {
     if (!entityId.startsWith('binary_sensor.')) return false;
-    const stateObj = hass.states[entityId];
-    if (!stateObj) return false;
-    const deviceClass = stateObj.attributes.device_class as string | undefined;
-    return deviceClass && ['occupancy', 'motion', 'presence'].includes(deviceClass);
+    return isPresenceSensor(hass.states[entityId]?.attributes);
   });
 }

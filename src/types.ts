@@ -100,4 +100,5 @@ export interface HassEntityRegistryEntry {
   platform: string;
   disabled_by: string | null;
   hidden_by: string | null;
+  entity_category?: 'config' | 'diagnostic' | null;
 }
