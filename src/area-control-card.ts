@@ -60,7 +60,6 @@ export class AreaControlCard extends LitElement {
     return {
       ...DEFAULT_CONFIG,
       color_preset: 'ocean',
-      background_mode: 'gradient',
       entities: [],
     };
   }
@@ -197,21 +196,21 @@ export class AreaControlCard extends LitElement {
       `;
     }
 
-    // Priority 2: HA area picture
+    // Priority 2: Custom image URL
+    if (this._config.image_url) {
+      return html`
+        <div class="bottom-visual image-visual ${isOccupied ? 'animated' : ''}">
+          <img src=${this._config.image_url} alt="" loading="lazy" />
+        </div>
+      `;
+    }
+
+    // Priority 3: HA area picture
     const areaPicture = area?.picture;
     if (areaPicture) {
       return html`
         <div class="bottom-visual image-visual ${isOccupied ? 'animated' : ''}">
           <img src=${areaPicture} alt="" loading="lazy" />
-        </div>
-      `;
-    }
-
-    // Priority 3: Custom image URL
-    if (this._config.image_url) {
-      return html`
-        <div class="bottom-visual image-visual ${isOccupied ? 'animated' : ''}">
-          <img src=${this._config.image_url} alt="" loading="lazy" />
         </div>
       `;
     }

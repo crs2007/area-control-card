@@ -6,12 +6,8 @@
     "navigation_path": "נתיב ניווט",
     "section_appearance": "מראה",
     "color_preset": "ערכת צבעים",
-    "background_mode": "רקע",
-    "gradient": "גרדיאנט מונפש",
-    "image": "תמונה מותאמת",
     "image_url": "כתובת תמונה",
     "section_presence": "חיישן נוכחות",
-    "no_sensor": "ללא",
     "section_entities": "בקרת ישויות",
     "pin_entity": "הצג בכרטיס",
     "max_entities": "מקסימום 8 ישויות",
@@ -20,7 +16,7 @@
     "hold_action": "פעולת לחיצה ארוכה",
     "double_tap_action": "פעולת לחיצה כפולה",
     "card_icon": "אייקון כרטיס",
-    "visual_priority": "עדיפות: אייקון ← תמונת אזור ← כתובת תמונה ← גרדיאנט",
+    "visual_priority": "עדיפות: אייקון ← כתובת תמונה ← תמונת אזור ← גרדיאנט",
     "move_up": "הזז למעלה",
     "move_down": "הזז למטה",
     "unpin_entity": "הסר מהכרטיס"
@@ -28,8 +24,6 @@
   "card": {
     "occupied": "תפוס",
     "clear": "פנוי",
-    "unavailable": "לא זמין",
-    "unknown": "לא ידוע",
     "confirm_unlock": "לפתוח את הנעילה של",
     "no_area": "בחר אזור"
   },

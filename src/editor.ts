@@ -1,19 +1,8 @@
 import { LitElement, html, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { AreaControlCardConfig, HomeAssistant, EntityConfig } from './types';
-import {
-  EDITOR_TAG,
-  COLOR_PRESETS,
-  MAX_ENTITIES,
-  DOMAIN_ICONS,
-  SUPPORTED_DOMAINS,
-  DEFAULT_CONFIG,
-} from './const';
-import {
-  getAreaEntities,
-  getAreaEntitiesByDomain,
-  getPresenceSensors,
-} from './utils/area-entities';
+import { AreaControlCardConfig, HomeAssistant } from './types';
+import { EDITOR_TAG, COLOR_PRESETS, MAX_ENTITIES, DOMAIN_ICONS, DEFAULT_CONFIG } from './const';
+import { getAreaEntities, getAreaEntitiesByDomain, isPresenceSensor } from './utils/area-entities';
 import { getEntityName, getDomain, fireEvent } from './utils/ha-helpers';
 import { localize } from './utils/localize';
 import { editorStyles } from './styles';
@@ -136,8 +125,7 @@ export class AreaControlCardEditor extends LitElement {
         .entityFilter=${(entity: { entity_id: string; attributes?: { device_class?: string } }) => {
           const registryEntry = this.hass.entities[entity.entity_id];
           if (registryEntry?.hidden_by) return false;
-          const dc = entity.attributes?.device_class;
-          if (dc !== 'occupancy' && dc !== 'motion' && dc !== 'presence') return false;
+          if (!isPresenceSensor(entity.attributes)) return false;
           if (areaEntityIds && !areaEntityIds.has(entity.entity_id)) return false;
           return true;
         }}

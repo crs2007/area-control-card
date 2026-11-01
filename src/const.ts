@@ -67,7 +67,6 @@ export const SUPPORTED_DOMAINS = Object.keys(DOMAIN_ICONS);
 
 export const DEFAULT_CONFIG: Partial<AreaControlCardConfig> = {
   color_preset: 'ocean',
-  background_mode: 'gradient',
   entities: [],
   tap_action: { action: 'navigate' },
   hold_action: { action: 'more-info' },

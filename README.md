@@ -12,13 +12,11 @@
 
 **Area Control Card** gives any Home Assistant user a beautiful, interactive room control panel — configured entirely through the visual editor (GUI). Pick an area, and the card auto-discovers devices. Pick a color theme, and the entire card adapts. Pick a presence sensor, and the card comes alive when someone walks in. **Zero YAML required.**
 
-![Area Control Card Preview](images/card-preview.png)
-
 ## Features
 
 - **Zero YAML** — Full GUI visual editor, no YAML needed for basic setup
 - **Area Auto-Discovery** — Select an area and the card automatically finds all devices and entities
-- **8 Entity Domains** — Lights, fans, switches, media players, climate, covers, locks, scenes & scripts
+- **9 Entity Domains** — Lights, fans, switches, media players, climate, covers, locks, scenes & scripts (other domains can be added in YAML)
 - **6 Color Themes** — Ocean, Sunset, Forest, Lavender, Amber, Slate
 - **Presence Sensing** — Animated badge, border glow, and background animations when a room is occupied
 - **Glassmorphism Design** — Backdrop blur, semi-transparent layers, subtle glow effects
@@ -26,10 +24,7 @@
 - **i18n Ready** — English and Hebrew included, easily extensible
 - **Lightweight** — Single JS file, no dependencies on other custom cards
 
-### Card States
-
-| Active (entities ON) | Inactive (entities OFF) | Occupied (presence detected) |
-|:---:|:---:|:---:|
+---:|:---:|:---:|
 | ![Active state](images/card-active.png) | ![Inactive state](images/card-inactive.png) | ![Occupied state](images/card-occupied.png) |
 
 ---
@@ -72,8 +67,6 @@ The card is fully configurable from the Home Assistant visual editor. No YAML ne
 
 After adding the card to your dashboard, the visual editor provides five sections:
 
-![Visual Editor](images/visual-editor.png)
-
 ### Section 1 — Room Setup
 
 | Setting | Description | Default |
@@ -87,8 +80,10 @@ After adding the card to your dashboard, the visual editor provides five section
 | Setting | Description | Default |
 |:---|:---|:---|
 | Color Theme | 6 preset color swatches to pick from | Ocean |
-| Background Mode | "Animated Gradient" or "Custom Image" | Animated Gradient |
-| Image URL | URL for custom background image (only when "Custom Image" is selected) | — |
+| Card Icon | Icon shown in the bottom-left circle | — |
+| Image URL | Image shown in the bottom-left circle | — |
+
+The bottom-left visual uses the first one available: **Card Icon → Image URL → Area Picture → animated gradient**.
 
 ### Section 3 — Presence Sensor
 
@@ -140,8 +135,6 @@ Each entity domain gets a chip with tap-to-toggle and state-aware visuals:
 - **Inactive (OFF):** Semi-transparent background + bordered chip + muted icon
 - **Unavailable:** Greyed out + dashed border + non-interactive
 
-![Entity Chips](images/entity-chips.png)
-
 </details>
 
 ---
@@ -152,8 +145,6 @@ Each entity domain gets a chip with tap-to-toggle and state-aware visuals:
 <summary>Click to show color presets</summary>
 
 Six built-in color presets are available, each adapting to HA dark and light modes:
-
-![Color Themes](images/color-themes.png)
 
 | Preset | Primary | Accent | Best For |
 |:---|:---|:---|:---|
@@ -174,10 +165,6 @@ Six built-in color presets are available, each adapting to HA dark and light mod
 <summary>Click to show presence features</summary>
 
 When a presence/motion sensor is configured and detects occupancy:
-
-| Clear | Occupied |
-|:---:|:---:|
-| ![Clear state](images/presence-clear.png) | ![Occupied state](images/presence-occupied.png) |
 
 | Feature | Occupied | Clear |
 |:---|:---|:---|
@@ -204,8 +191,7 @@ type: custom:area-control-card
 area: office
 name: My Office
 color_preset: ocean
-background_mode: gradient
-# background_mode: image
+# card_icon: mdi:desk
 # image_url: /local/images/office.jpg
 presence_entity: binary_sensor.office_motion
 navigation_path: /dashboard/office
@@ -226,15 +212,15 @@ entities:
 | `area` | string | No | — | Home Assistant area ID |
 | `name` | string | No | Area name | Display name override |
 | `color_preset` | string | No | `ocean` | One of: `ocean`, `sunset`, `forest`, `lavender`, `amber`, `slate` |
-| `background_mode` | string | No | `gradient` | `gradient` or `image` |
-| `image_url` | string | No | — | Background image URL (when `background_mode: image`) |
+| `card_icon` | string | No | — | MDI icon for the bottom-left visual (takes priority over everything else) |
+| `image_url` | string | No | — | Image for the bottom-left visual (takes priority over the area picture) |
 | `presence_entity` | string | No | — | `binary_sensor` entity ID for presence detection |
 | `navigation_path` | string | No | — | Dashboard path to navigate on card tap |
-| `entities` | list | No | — | List of entity configurations (max 8) |
+| `entities` | list | No | Auto-discovered | List of entities (max 8). Plain entity ids are accepted. When empty, the card shows the supported entities of the area. |
 | `entities[].entity` | string | Yes | — | Entity ID |
 | `entities[].name` | string | No | Friendly name | Display name override |
 | `entities[].icon` | string | No | Domain default | Custom MDI icon |
-| `tap_action` | object | No | `navigate` | Standard HA tap action |
+| `tap_action` | object | No | `navigate` | Standard HA action. `navigate` uses `navigation_path` if the action has none. |
 | `hold_action` | object | No | `more-info` | Standard HA hold action |
 | `double_tap_action` | object | No | `none` | Standard HA double-tap action |
 
@@ -322,6 +308,6 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute.
+Contributions are welcome! Run `npm run lint`, `npm test` and `npm run build` before opening a pull request.
 
 If you find a bug or have a feature request, please [open an issue](https://github.com/crs2007/area-control-card/issues).
