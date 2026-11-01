@@ -21,7 +21,13 @@ import { discoverAreaEntities } from './utils/area-entities';
 import { hassChangedForCard } from './utils/should-update';
 import { localize } from './utils/localize';
 import { normalizeConfig } from './utils/config';
-import { ActionKind, ResolvedActions, hasAnyAction, resolveActions } from './utils/actions';
+import {
+  ActionKind,
+  ResolvedActions,
+  hasAnyAction,
+  resolveActions,
+  resolveChipAction,
+} from './utils/actions';
 import { ActionGesture } from './utils/action-gesture';
 import { resolveRoomType } from './utils/room-type';
 import { renderScene } from './scenes';
@@ -279,11 +285,7 @@ export class AreaControlCard extends LitElement {
     `;
   }
 
-  private _renderChip(entityConfig: {
-    entity: string;
-    icon?: string;
-    name?: string;
-  }): TemplateResult {
+  private _renderChip(entityConfig: EntityConfig): TemplateResult {
     const stateObj = this.hass.states[entityConfig.entity];
     const domain = getDomain(entityConfig.entity);
     const unavailable = isEntityUnavailable(stateObj);
@@ -305,7 +307,7 @@ export class AreaControlCard extends LitElement {
       <button
         class="chip ${chipClass} d-${domain}"
         style=${colorStyle}
-        @click=${(e: Event) => this._handleChipClick(e, entityConfig.entity)}
+        @click=${(e: Event) => this._handleChipClick(e, entityConfig)}
         title=${label}
         aria-label=${label}
         aria-pressed=${oneShot ? nothing : String(active)}
@@ -316,10 +318,21 @@ export class AreaControlCard extends LitElement {
     `;
   }
 
-  private _handleChipClick(e: Event, entityId: string): void {
+  private _handleChipClick(e: Event, entityConfig: EntityConfig): void {
     e.stopPropagation();
+    const entityId = entityConfig.entity;
     const stateObj = this.hass.states[entityId];
     if (isEntityUnavailable(stateObj)) return;
+
+    const chipAction = resolveChipAction(entityConfig);
+    if (chipAction) {
+      if (chipAction.action === 'none') return;
+      fireEvent(this, 'hass-action', {
+        config: { entity: entityId, tap_action: chipAction },
+        action: 'tap',
+      });
+      return;
+    }
     // Unlocking is security-sensitive: require explicit confirmation
     if (getDomain(entityId) === 'lock' && stateObj.state === 'locked') {
       const lang = this.hass.language || 'en';

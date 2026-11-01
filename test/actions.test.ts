@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { resolveActions, hasAnyAction, ActionKind } from '../src/utils/actions';
+import { resolveActions, resolveChipAction, hasAnyAction, ActionKind } from '../src/utils/actions';
 import { ActionGesture, HOLD_MS, DOUBLE_TAP_MS } from '../src/utils/action-gesture';
 import type { AreaControlCardConfig } from '../src/types';
 
@@ -54,6 +54,39 @@ describe('resolveActions', () => {
       cfg({ double_tap_action: { action: 'perform-action', perform_action: 'x.y' } }),
     );
     expect(r.double_tap_action.action).toBe('perform-action');
+  });
+});
+
+describe('resolveChipAction', () => {
+  it('falls back to the default toggle when no tap_action is set', () => {
+    expect(resolveChipAction({ entity: 'light.a' })).toBeUndefined();
+  });
+
+  it('returns a configured perform-action', () => {
+    const tap_action = {
+      action: 'perform-action',
+      perform_action: 'script.roller',
+      data: { room: 'kitchen' },
+    };
+    expect(resolveChipAction({ entity: 'cover.a', tap_action })).toEqual(tap_action);
+  });
+
+  it('allows more-info on the chip entity', () => {
+    expect(
+      resolveChipAction({ entity: 'binary_sensor.door', tap_action: { action: 'more-info' } }),
+    ).toEqual({ action: 'more-info' });
+  });
+
+  it('falls back to the toggle when the action cannot run', () => {
+    expect(
+      resolveChipAction({ entity: 'light.a', tap_action: { action: 'navigate' } }),
+    ).toBeUndefined();
+  });
+
+  it('keeps an explicit none so the chip does nothing', () => {
+    expect(resolveChipAction({ entity: 'light.a', tap_action: { action: 'none' } })).toEqual({
+      action: 'none',
+    });
   });
 });
 

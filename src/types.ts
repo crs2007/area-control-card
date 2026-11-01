@@ -26,6 +26,8 @@ export interface EntityConfig {
   entity: string;
   name?: string;
   icon?: string;
+  /** Replaces the default toggle when the chip is tapped */
+  tap_action?: ActionConfig;
 }
 
 export interface AreaControlCardConfig {

@@ -231,7 +231,13 @@ entities:
   - entity: fan.office_fan
   - entity: switch.office_monitor
   - entity: media_player.office_speaker
+    tap_action: # run a script instead of toggling; the chip still shows the TV state
+      action: perform-action
+      perform_action: script.office_tv_on
   - entity: climate.office_ac
+  - entity: binary_sensor.office_door
+    tap_action:
+      action: more-info
 ```
 
 ### Config Reference
@@ -250,6 +256,7 @@ entities:
 | `entities[].entity` | string | Yes | — | Entity ID |
 | `entities[].name` | string | No | Friendly name | Display name override |
 | `entities[].icon` | string | No | Domain default | Custom MDI icon |
+| `entities[].tap_action` | object | No | Toggle | Standard HA action run when the chip is tapped (e.g. `perform-action` a script, `more-info`, `none`). The chip still shows its entity's state. YAML only. |
 | `tap_action` | object | No | `navigate` | Standard HA action. `navigate` uses `navigation_path` if the action has none. |
 | `hold_action` | object | No | `more-info` | Standard HA hold action |
 | `double_tap_action` | object | No | `none` | Standard HA double-tap action |

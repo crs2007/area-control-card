@@ -1,4 +1,4 @@
-import { ActionConfig, AreaControlCardConfig } from '../types';
+import { ActionConfig, AreaControlCardConfig, EntityConfig } from '../types';
 
 export type ActionKind = 'tap' | 'hold' | 'double_tap';
 
@@ -45,6 +45,16 @@ export function resolveActions(
     hold_action: resolve(config.hold_action),
     double_tap_action: resolve(config.double_tap_action),
   };
+}
+
+/**
+ * The action a chip runs instead of toggling its entity. `undefined` means the default toggle;
+ * a configured action that cannot run (e.g. navigate without a path) also falls back to it.
+ */
+export function resolveChipAction(entityConfig: EntityConfig): ActionConfig | undefined {
+  const action = entityConfig.tap_action;
+  if (action?.action === 'none') return NONE;
+  return isUsable(action, entityConfig.entity) ? action : undefined;
 }
 
 export function hasAnyAction(actions: ResolvedActions): boolean {

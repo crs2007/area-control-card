@@ -22,6 +22,12 @@ describe('normalizeConfig', () => {
     expect(result.entities).toEqual([{ entity: 'light.a' }, { entity: 'fan.b', name: 'F' }]);
   });
 
+  it('keeps a per-entity tap_action', () => {
+    const tap_action = { action: 'perform-action', perform_action: 'script.tv_on' };
+    const result = normalizeConfig(cfg({ entities: [{ entity: 'media_player.tv', tap_action }] }));
+    expect(result.entities[0].tap_action).toEqual(tap_action);
+  });
+
   it('rejects entities that are not a list', () => {
     expect(() => normalizeConfig(cfg({ entities: { entity: 'light.a' } }))).toThrow(
       '"entities" must be a list',
