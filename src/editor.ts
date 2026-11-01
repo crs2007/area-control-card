@@ -1,8 +1,16 @@
 import { LitElement, html, nothing, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { AreaControlCardConfig, HomeAssistant } from './types';
-import { EDITOR_TAG, COLOR_PRESETS, MAX_ENTITIES, DOMAIN_ICONS, DEFAULT_CONFIG } from './const';
-import { getAreaEntities, getAreaEntitiesByDomain, isPresenceSensor } from './utils/area-entities';
+import {
+  EDITOR_TAG,
+  COLOR_PRESETS,
+  MAX_ENTITIES,
+  DOMAIN_ICONS,
+  DEFAULT_CONFIG,
+  PRESENCE_DEVICE_CLASSES,
+  ROOM_TYPES,
+} from './const';
+import { getAreaEntitiesByDomain, getPresenceSensors } from './utils/area-entities';
 import { getEntityName, getDomain, fireEvent } from './utils/ha-helpers';
 import { localize } from './utils/localize';
 import { editorStyles } from './styles';
@@ -91,6 +99,14 @@ export class AreaControlCardEditor extends LitElement {
         )}
       </div>
 
+      <ha-form
+        .hass=${this.hass}
+        .data=${{ room_type: this._config.room_type || 'auto' }}
+        .schema=${this._roomTypeSchema()}
+        .computeLabel=${() => localize('editor.room_type', this._lang)}
+        @value-changed=${this._roomTypeChanged}
+      ></ha-form>
+
       <ha-icon-picker
         .hass=${this.hass}
         .value=${this._config.card_icon || ''}
@@ -110,28 +126,52 @@ export class AreaControlCardEditor extends LitElement {
     `;
   }
 
+  private _roomTypeSchema() {
+    const option = (value: string, key: string) => ({ value, label: localize(key, this._lang) });
+    return [
+      {
+        name: 'room_type',
+        selector: {
+          select: {
+            mode: 'dropdown',
+            options: [
+              option('auto', 'editor.room_type_auto'),
+              option('none', 'editor.room_type_none'),
+              ...ROOM_TYPES.map((type) => option(type, `room.${type}`)),
+            ],
+          },
+        },
+      },
+    ];
+  }
+
   private _renderPresenceSection(): TemplateResult {
     const areaId = this._config.area;
-    const areaEntityIds = areaId ? new Set(getAreaEntities(this.hass, areaId)) : null;
+    const presence = this._config.presence_entity;
+    const value = Array.isArray(presence) ? presence : presence ? [presence] : [];
+
+    // In an area, offer its presence sensors; otherwise any sensor of a presence device class
+    const entitySelector = areaId
+      ? { multiple: true, include_entities: getPresenceSensors(this.hass, areaId) }
+      : {
+          multiple: true,
+          filter: PRESENCE_DEVICE_CLASSES.map((device_class) => ({
+            domain: 'binary_sensor',
+            device_class,
+          })),
+        };
 
     return html`
       <h3>${localize('editor.section_presence', this._lang)}</h3>
 
-      <ha-entity-picker
+      <ha-form
         .hass=${this.hass}
-        .value=${this._config.presence_entity || ''}
-        .label=${localize('editor.section_presence', this._lang)}
-        .includeDomains=${['binary_sensor']}
-        .entityFilter=${(entity: { entity_id: string; attributes?: { device_class?: string } }) => {
-          const registryEntry = this.hass.entities[entity.entity_id];
-          if (registryEntry?.hidden_by) return false;
-          if (!isPresenceSensor(entity.attributes)) return false;
-          if (areaEntityIds && !areaEntityIds.has(entity.entity_id)) return false;
-          return true;
-        }}
-        allow-custom-entity
+        .data=${{ presence_entity: value }}
+        .schema=${[{ name: 'presence_entity', selector: { entity: entitySelector } }]}
+        .computeLabel=${() => localize('editor.presence_sensors', this._lang)}
         @value-changed=${this._presenceChanged}
-      ></ha-entity-picker>
+      ></ha-form>
+      <p class="hint">${localize('editor.presence_hint', this._lang)}</p>
     `;
   }
 
@@ -272,9 +312,17 @@ export class AreaControlCardEditor extends LitElement {
     this._updateConfig({ image_url: (e.target as HTMLInputElement).value || undefined });
   }
 
+  private _roomTypeChanged(e: CustomEvent): void {
+    const value = e.detail?.value?.room_type;
+    this._updateConfig({ room_type: value && value !== 'auto' ? value : undefined });
+  }
+
+  /** Keep YAML tidy: no key for none, a plain string for one sensor, a list for several */
   private _presenceChanged(e: CustomEvent): void {
-    const value = e.detail?.value;
-    this._updateConfig({ presence_entity: value || undefined });
+    const value: string[] = e.detail?.value?.presence_entity || [];
+    this._updateConfig({
+      presence_entity: value.length > 1 ? value : value[0] || undefined,
+    });
   }
 
   private _pinEntity(entityId: string): void {

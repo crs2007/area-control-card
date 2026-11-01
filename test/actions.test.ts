@@ -44,7 +44,7 @@ describe('resolveActions', () => {
 
   it('prefers the presence entity for more-info', () => {
     const r = resolveActions(
-      cfg({ presence_entity: 'binary_sensor.m', entities: [{ entity: 'light.a' }] }),
+      cfg({ presence_entities: ['binary_sensor.m'], entities: [{ entity: 'light.a' }] }),
     );
     expect(r.entity).toBe('binary_sensor.m');
   });

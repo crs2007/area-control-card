@@ -12,6 +12,16 @@ export interface ActionConfig {
 
 export type ColorPreset = 'ocean' | 'sunset' | 'forest' | 'lavender' | 'amber' | 'slate';
 
+export type RoomType =
+  | 'living'
+  | 'bedroom'
+  | 'kitchen'
+  | 'bathroom'
+  | 'office'
+  | 'kids'
+  | 'dining'
+  | 'outdoor';
+
 export interface EntityConfig {
   entity: string;
   name?: string;
@@ -29,9 +39,12 @@ export interface AreaControlCardConfig {
   color_preset: ColorPreset;
   image_url?: string;
   card_icon?: string;
+  room_type?: RoomType | 'auto' | 'none';
 
-  // Presence
-  presence_entity?: string;
+  // Presence: one sensor or a list; the room is occupied while any of them is on
+  presence_entity?: string | string[];
+  /** Normalized from presence_entity by normalizeConfig */
+  presence_entities: string[];
 
   // Entities (ordered, max 8)
   entities: EntityConfig[];
@@ -82,6 +95,7 @@ export interface HassArea {
   area_id: string;
   name: string;
   picture: string | null;
+  icon?: string | null;
   aliases: string[];
 }
 

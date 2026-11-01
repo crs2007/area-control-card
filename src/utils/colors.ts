@@ -13,3 +13,9 @@ export function applyColorVariables(element: HTMLElement, preset: ColorPreset): 
   element.style.setProperty('--acc-glow-secondary', palette.glow_secondary);
   element.style.setProperty('--acc-background-tint', palette.background_tint);
 }
+
+/** `#RRGGBB` → `rgba(r,g,b,alpha)` */
+export function hexToRgba(hex: string, alpha: number): string {
+  const value = parseInt(hex.replace('#', ''), 16);
+  return `rgba(${(value >> 16) & 255},${(value >> 8) & 255},${value & 255},${alpha})`;
+}

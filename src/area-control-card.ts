@@ -1,8 +1,15 @@
 import { LitElement, html, nothing, PropertyValues, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { AreaControlCardConfig, EntityConfig, HomeAssistant } from './types';
-import { CARD_TAG, EDITOR_TAG, CARD_VERSION, DEFAULT_CONFIG, DOMAIN_ICONS } from './const';
-import { applyColorVariables } from './utils/colors';
+import { AreaControlCardConfig, EntityConfig, HassArea, HomeAssistant, RoomType } from './types';
+import {
+  CARD_TAG,
+  EDITOR_TAG,
+  CARD_VERSION,
+  DEFAULT_CONFIG,
+  DOMAIN_COLORS,
+  DOMAIN_ICONS,
+} from './const';
+import { applyColorVariables, hexToRgba } from './utils/colors';
 import {
   getDomain,
   isEntityActive,
@@ -16,6 +23,9 @@ import { localize } from './utils/localize';
 import { normalizeConfig } from './utils/config';
 import { ActionKind, ResolvedActions, hasAnyAction, resolveActions } from './utils/actions';
 import { ActionGesture } from './utils/action-gesture';
+import { resolveRoomType } from './utils/room-type';
+import { renderScene } from './scenes';
+import { sceneStyles } from './scenes/scene-styles';
 import { cardStyles } from './styles';
 
 // Register editor as side effect
@@ -29,7 +39,7 @@ console.info(
 
 @customElement(CARD_TAG)
 export class AreaControlCard extends LitElement {
-  static styles = cardStyles;
+  static styles = [cardStyles, sceneStyles];
 
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: AreaControlCardConfig;
@@ -121,14 +131,13 @@ export class AreaControlCard extends LitElement {
     const area = areaId ? this.hass.areas?.[areaId] : undefined;
     const roomName = this._config.name || area?.name || localize('card.no_area', lang);
 
-    // Presence state
-    const presenceEntity = this._config.presence_entity;
-    const presenceState = presenceEntity ? this.hass.states[presenceEntity] : undefined;
-    const isOccupied = presenceState?.state === 'on';
+    // Presence: occupied while any chosen sensor is on
+    const presenceEntities = this._config.presence_entities;
+    const isOccupied = presenceEntities.some((id) => this.hass.states[id]?.state === 'on');
 
     // State text
     let stateText = '';
-    if (presenceEntity) {
+    if (presenceEntities.length) {
       stateText = isOccupied ? localize('card.occupied', lang) : localize('card.clear', lang);
     }
 
@@ -139,7 +148,15 @@ export class AreaControlCard extends LitElement {
       entities = this._discover(areaId);
     }
 
-    this._watched = [...entities.map((e) => e.entity), ...(presenceEntity ? [presenceEntity] : [])];
+    this._watched = [...entities.map((e) => e.entity), ...presenceEntities];
+
+    // Domains with an active entity on the card, so the room scene can reflect them
+    const activeDomains = new Set(
+      entities
+        .map((e) => this.hass.states[e.entity])
+        .filter((stateObj) => stateObj && isEntityActive(stateObj))
+        .map((stateObj) => getDomain(stateObj.entity_id)),
+    );
 
     // Entity-less actions (navigate) work as configured; more-info falls back to what is shown
     this._actions = resolveActions(this._config, entities[0]?.entity);
@@ -176,7 +193,7 @@ export class AreaControlCard extends LitElement {
           >
             ${entities.map((entityConfig) => this._renderChip(entityConfig))}
           </div>
-          ${this._renderBottomVisual(area, isOccupied)}
+          ${this._renderBottomVisual(area, isOccupied, activeDomains)}
           ${stateText ? html`<div class="room-state">${stateText}</div>` : nothing}
         </div>
       </ha-card>
@@ -184,39 +201,82 @@ export class AreaControlCard extends LitElement {
   }
 
   private _renderBottomVisual(
-    area: { picture: string | null } | undefined,
+    area: HassArea | undefined,
     isOccupied: boolean,
+    activeDomains: Set<string>,
   ): TemplateResult {
     // Priority 1: card_icon config
     if (this._config.card_icon) {
-      return html`
-        <div class="bottom-visual icon-visual ${isOccupied ? 'animated' : ''}">
-          <ha-icon .icon=${this._config.card_icon}></ha-icon>
-        </div>
-      `;
+      return this._renderIconVisual(this._config.card_icon, isOccupied);
     }
 
     // Priority 2: Custom image URL
     if (this._config.image_url) {
-      return html`
-        <div class="bottom-visual image-visual ${isOccupied ? 'animated' : ''}">
-          <img src=${this._config.image_url} alt="" loading="lazy" />
-        </div>
-      `;
+      return this._renderImageVisual(this._config.image_url, isOccupied);
     }
 
-    // Priority 3: HA area picture
-    const areaPicture = area?.picture;
-    if (areaPicture) {
-      return html`
-        <div class="bottom-visual image-visual ${isOccupied ? 'animated' : ''}">
-          <img src=${areaPicture} alt="" loading="lazy" />
-        </div>
-      `;
+    // Priority 3: a room scene chosen in the config. Priority 5: one guessed from the area.
+    const room = resolveRoomType(this._config, area);
+    if (room?.explicit) {
+      return this._renderSceneVisual(room.type, isOccupied, activeDomains);
     }
 
-    // Priority 4: Gradient blob fallback
+    // Priority 4: HA area picture
+    if (area?.picture) {
+      return this._renderImageVisual(area.picture, isOccupied);
+    }
+
+    if (room) {
+      return this._renderSceneVisual(room.type, isOccupied, activeDomains);
+    }
+
+    // Priority 6: the area's own icon
+    if (area?.icon) {
+      return this._renderIconVisual(area.icon, isOccupied);
+    }
+
+    // Priority 7: Gradient blob fallback
     return html` <div class="gradient-blob ${isOccupied ? 'animated' : ''}"></div> `;
+  }
+
+  private _renderIconVisual(icon: string, isOccupied: boolean): TemplateResult {
+    return html`
+      <div class="bottom-visual icon-visual ${isOccupied ? 'animated' : ''}">
+        <ha-icon .icon=${icon}></ha-icon>
+      </div>
+    `;
+  }
+
+  private _renderImageVisual(src: string, isOccupied: boolean): TemplateResult {
+    return html`
+      <div class="bottom-visual image-visual ${isOccupied ? 'animated' : ''}">
+        <img src=${src} alt="" loading="lazy" />
+      </div>
+    `;
+  }
+
+  private _renderSceneVisual(
+    type: RoomType,
+    isOccupied: boolean,
+    activeDomains: Set<string>,
+  ): TemplateResult {
+    const classes = [
+      isOccupied ? 'motion' : '',
+      activeDomains.has('light') ? 'lights-on' : '',
+      activeDomains.has('fan') ? 'fan-on' : '',
+      activeDomains.has('media_player') ? 'media-on' : '',
+    ].join(' ');
+    return html`
+      <div
+        class="bottom-visual scene-visual ${classes}"
+        role="img"
+        aria-label=${localize(`room.${type}`, this.hass.language || 'en')}
+      >
+        <svg viewBox="0 0 160 120" preserveAspectRatio="xMinYMax meet" aria-hidden="true">
+          ${renderScene(type)}
+        </svg>
+      </div>
+    `;
   }
 
   private _renderChip(entityConfig: {
@@ -238,20 +298,20 @@ export class AreaControlCard extends LitElement {
     const label =
       entityConfig.name || (stateObj?.attributes.friendly_name as string) || entityConfig.entity;
     const oneShot = ['scene', 'script', 'button', 'input_button'].includes(domain);
-
-    // Spin fan icon when active
-    const shouldSpin = active && domain === 'fan';
+    const color = DOMAIN_COLORS[domain];
+    const colorStyle = color ? `--chip-color: ${color}; --chip-glow: ${hexToRgba(color, 0.6)}` : '';
 
     return html`
       <button
-        class="chip ${chipClass}"
+        class="chip ${chipClass} d-${domain}"
+        style=${colorStyle}
         @click=${(e: Event) => this._handleChipClick(e, entityConfig.entity)}
         title=${label}
         aria-label=${label}
         aria-pressed=${oneShot ? nothing : String(active)}
         ?disabled=${unavailable}
       >
-        <ha-icon class=${shouldSpin ? 'icon-spin' : ''} .icon=${icon}></ha-icon>
+        <ha-icon .icon=${icon}></ha-icon>
       </button>
     `;
   }

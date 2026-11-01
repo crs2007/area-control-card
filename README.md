@@ -10,22 +10,35 @@
 
 ---
 
-**Area Control Card** gives any Home Assistant user a beautiful, interactive room control panel — configured entirely through the visual editor (GUI). Pick an area, and the card auto-discovers devices. Pick a color theme, and the entire card adapts. Pick a presence sensor, and the card comes alive when someone walks in. **Zero YAML required.**
+**Area Control Card** gives any Home Assistant user a beautiful, interactive room control panel — configured entirely through the visual editor (GUI). Pick an area, and the card auto-discovers devices. Pick a color theme, and the entire card adapts. Pick a motion sensor, and the room scene comes alive when someone walks in. **Zero YAML required.**
+
+![Area Control Card — living room, kitchen and kids room scenes](https://raw.githubusercontent.com/crs2007/area-control-card/master/images/card-preview.png)
 
 ## Features
 
 - **Zero YAML** — Full GUI visual editor, no YAML needed for basic setup
 - **Area Auto-Discovery** — Select an area and the card automatically finds all devices and entities
 - **9 Entity Domains** — Lights, fans, switches, media players, climate, covers, locks, scenes & scripts (other domains can be added in YAML)
-- **6 Color Themes** — Ocean, Sunset, Forest, Lavender, Amber, Slate
-- **Presence Sensing** — Animated badge, border glow, and background animations when a room is occupied
+- **Animated Room Scenes** — 8 illustrated rooms (living room, bedroom, kitchen, bathroom, office, kids room, dining room, garden) that come alive on motion, picked automatically from the area icon or name
+- **Colorful Chips** — Each domain has its own color and icon animation (glowing bulbs, spinning fans, pulsing media)
+- **6 Color Themes** — Ocean, Sunset, Forest, Lavender, Amber, Slate — the room scenes follow the theme too
+- **Presence Sensing** — One or more motion/occupancy sensors per area; animated scene, badge and border glow while any of them detects motion
 - **Glassmorphism Design** — Backdrop blur, semi-transparent layers, subtle glow effects
 - **Responsive** — Works on mobile, tablet, desktop, and cast displays
 - **i18n Ready** — English and Hebrew included, easily extensible
 - **Lightweight** — Single JS file, no dependencies on other custom cards
 
----:|:---:|:---:|
-| ![Active state](images/card-active.png) | ![Inactive state](images/card-inactive.png) | ![Occupied state](images/card-occupied.png) |
+---
+
+## Room Scenes
+
+Eight animated rooms, each tinted by the card's color theme. When the room's motion sensor fires, the scene comes alive: lamps warm up, curtains and plants sway, steam rises, water drips, the mobile swings and the ceiling fan turns.
+
+![All eight room scenes: living room, bedroom, kitchen, bathroom, office, kids room, dining room and garden](https://raw.githubusercontent.com/crs2007/area-control-card/master/images/room-scenes.png)
+
+| All off | Devices on | Motion detected |
+|:---:|:---:|:---:|
+| ![Card with every device off](https://raw.githubusercontent.com/crs2007/area-control-card/master/images/card-inactive.png) | ![Card with devices on: colored chips and a lit lamp](https://raw.githubusercontent.com/crs2007/area-control-card/master/images/card-active.png) | ![Card with motion detected: presence badge and animated scene](https://raw.githubusercontent.com/crs2007/area-control-card/master/images/card-occupied.png) |
 
 ---
 
@@ -80,16 +93,19 @@ After adding the card to your dashboard, the visual editor provides five section
 | Setting | Description | Default |
 |:---|:---|:---|
 | Color Theme | 6 preset color swatches to pick from | Ocean |
+| Room Scene | Animated room illustration: Auto, None, or a specific room | Auto |
 | Card Icon | Icon shown in the bottom-left circle | — |
 | Image URL | Image shown in the bottom-left circle | — |
 
-The bottom-left visual uses the first one available: **Card Icon → Image URL → Area Picture → animated gradient**.
+The bottom-left visual uses the first one available: **Card Icon → Image URL → Room Scene (chosen) → Area Picture → Room Scene (auto) → Area Icon → animated gradient**.
+
+With **Auto**, the scene is picked from the area icon (e.g. `mdi:sofa` → living room, `mdi:bed` → bedroom) and then from the area name (English and Hebrew keywords such as *kitchen*, *bath*, *office*, *סלון*, *מטבח*). An area picture still wins over an automatic match, so choose a room scene explicitly to show the scene instead.
 
 ### Section 3 — Presence Sensor
 
 | Setting | Description | Default |
 |:---|:---|:---|
-| Sensor | Dropdown of `binary_sensor.*` entities in the selected area (filtered by occupancy/motion/presence device class) | None |
+| Sensors | One or more `binary_sensor.*` entities in the selected area (occupancy/motion/presence device class). The room counts as occupied while any of them is on. | None |
 
 ### Section 4 — Entity Controls
 
@@ -120,18 +136,20 @@ Each entity domain gets a chip with tap-to-toggle and state-aware visuals:
 
 | Domain | Icon | Chip Tap Action | Visual State |
 |:---|:---|:---|:---|
-| `light` | `mdi:lightbulb` | Toggle on/off | Glow when on |
-| `fan` | `mdi:fan` | Toggle on/off | Icon spins when on |
-| `switch` | `mdi:power-plug` | Toggle on/off | Colored when on |
-| `media_player` | `mdi:television` | Toggle on/off | Colored when on |
-| `climate` | `mdi:thermometer` | Toggle on/off | Colored when on |
-| `cover` | `mdi:blinds` | Open/close | Colored when open |
-| `lock` | `mdi:lock` | Lock/unlock | Colored when locked |
+| `light` | `mdi:lightbulb` | Toggle on/off | Amber, bulb glows |
+| `fan` | `mdi:fan` | Toggle on/off | Cyan, icon spins |
+| `switch` | `mdi:power-plug` | Toggle on/off | Blue |
+| `media_player` | `mdi:television` | Toggle on/off | Purple, icon pulses |
+| `climate` | `mdi:thermometer` | Toggle on/off | Orange, icon floats |
+| `cover` | `mdi:blinds` | Open/close | Teal when open |
+| `lock` | `mdi:lock` | Lock/unlock | Green when locked |
 | `scene` | `mdi:palette` | Activate | One-shot |
 | `script` | `mdi:script-text` | Execute | One-shot |
 
+<img src="https://raw.githubusercontent.com/crs2007/area-control-card/master/images/entity-chips.png" alt="Chips in all three states: active, inactive and unavailable" width="372" />
+
 **Chip visual states:**
-- **Active (ON):** Colored background + white icon + glow animation
+- **Active (ON):** Domain-colored background + white icon + glow animation
 - **Inactive (OFF):** Semi-transparent background + bordered chip + muted icon
 - **Unavailable:** Greyed out + dashed border + non-interactive
 
@@ -144,7 +162,9 @@ Each entity domain gets a chip with tap-to-toggle and state-aware visuals:
 <details>
 <summary>Click to show color presets</summary>
 
-Six built-in color presets are available, each adapting to HA dark and light modes:
+Six built-in color presets are available, each adapting to HA dark and light modes. The room scene follows the theme too:
+
+![The living room scene in all six color themes](https://raw.githubusercontent.com/crs2007/area-control-card/master/images/color-themes.png)
 
 | Preset | Primary | Accent | Best For |
 |:---|:---|:---|:---|
@@ -164,16 +184,24 @@ Six built-in color presets are available, each adapting to HA dark and light mod
 <details>
 <summary>Click to show presence features</summary>
 
-When a presence/motion sensor is configured and detects occupancy:
+When one or more presence/motion sensors are configured and any of them detects motion:
+
+| Clear | Occupied |
+|:---:|:---:|
+| ![Bedroom card with no motion: static, muted scene](https://raw.githubusercontent.com/crs2007/area-control-card/master/images/presence-clear.png) | ![Bedroom card with motion: presence badge, glowing lamp and ripples](https://raw.githubusercontent.com/crs2007/area-control-card/master/images/presence-occupied.png) |
 
 | Feature | Occupied | Clear |
 |:---|:---|:---|
 | Status text | "Occupied" | "Clear" |
 | Presence badge | Animated pulsing dot | Hidden |
-| Background | Animated gradient shift / image breathing | Static |
+| Room scene | Comes alive: lamps warm up, plants and curtains sway, steam rises, the fan turns, motion ripples | Static and slightly muted |
+| Card / area icon | Ripple rings and a playful wiggle | Static |
+| Image / gradient | Image breathing / gradient shift | Static |
 | Border | Colored glow pulse | No glow |
 
-If no presence sensor is selected, the card works normally without these features.
+The room scene also reflects the chips on the card even without motion: lamps glow while a light is on, the TV lights up while a media player plays, and the ceiling fan spins while a fan is on.
+
+If no presence sensor is selected, the card works normally without these features. All animations stop when the system asks for reduced motion.
 
 </details>
 
@@ -191,9 +219,10 @@ type: custom:area-control-card
 area: office
 name: My Office
 color_preset: ocean
+room_type: office # auto (default), none, living, bedroom, kitchen, bathroom, office, kids, dining, outdoor
 # card_icon: mdi:desk
 # image_url: /local/images/office.jpg
-presence_entity: binary_sensor.office_motion
+presence_entity: binary_sensor.office_motion # or a list of sensors
 navigation_path: /dashboard/office
 entities:
   - entity: light.office_ceiling
@@ -214,7 +243,8 @@ entities:
 | `color_preset` | string | No | `ocean` | One of: `ocean`, `sunset`, `forest`, `lavender`, `amber`, `slate` |
 | `card_icon` | string | No | — | MDI icon for the bottom-left visual (takes priority over everything else) |
 | `image_url` | string | No | — | Image for the bottom-left visual (takes priority over the area picture) |
-| `presence_entity` | string | No | — | `binary_sensor` entity ID for presence detection |
+| `room_type` | string | No | `auto` | Room scene: `auto`, `none`, `living`, `bedroom`, `kitchen`, `bathroom`, `office`, `kids`, `dining` or `outdoor` |
+| `presence_entity` | string or list | No | — | One `binary_sensor` entity ID, or a list of them, for presence detection. Occupied while any is on. |
 | `navigation_path` | string | No | — | Dashboard path to navigate on card tap |
 | `entities` | list | No | Auto-discovered | List of entities (max 8). Plain entity ids are accepted. When empty, the card shows the supported entities of the area. |
 | `entities[].entity` | string | Yes | — | Entity ID |
@@ -303,6 +333,10 @@ The built file is output to `dist/area-control-card.js`. Copy it to your HA `con
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+### Credits
+
+The room scene artwork style, shared gradients, ceiling fan and lamp light cones are adapted from [ha-appliance-electromenager-cards](https://github.com/skyrotter/ha-appliance-electromenager-cards) by skyrotter (MIT). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ---
 

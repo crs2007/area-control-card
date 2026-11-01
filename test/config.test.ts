@@ -46,4 +46,31 @@ describe('normalizeConfig', () => {
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });
+
+  it('normalizes a single presence sensor to a list', () => {
+    expect(normalizeConfig(cfg({ presence_entity: 'binary_sensor.m' })).presence_entities).toEqual([
+      'binary_sensor.m',
+    ]);
+    expect(normalizeConfig(cfg()).presence_entities).toEqual([]);
+  });
+
+  it('accepts a list of presence sensors', () => {
+    const result = normalizeConfig(
+      cfg({ presence_entity: ['binary_sensor.a', 'binary_sensor.b'] }),
+    );
+    expect(result.presence_entities).toEqual(['binary_sensor.a', 'binary_sensor.b']);
+  });
+
+  it('rejects presence sensors that are not entity ids', () => {
+    expect(() => normalizeConfig(cfg({ presence_entity: [1] }))).toThrow('presence_entity');
+  });
+
+  it('defaults room_type to auto and falls back on unknown values', () => {
+    expect(normalizeConfig(cfg()).room_type).toBe('auto');
+    expect(normalizeConfig(cfg({ room_type: 'kitchen' })).room_type).toBe('kitchen');
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    expect(normalizeConfig(cfg({ room_type: 'attic' })).room_type).toBe('auto');
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
 });

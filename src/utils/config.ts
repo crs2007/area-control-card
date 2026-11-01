@@ -1,5 +1,6 @@
 import { AreaControlCardConfig, EntityConfig } from '../types';
 import { COLOR_PRESETS, DEFAULT_CONFIG, MAX_ENTITIES } from '../const';
+import { isRoomType } from './room-type';
 
 function normalizeEntities(raw: unknown): EntityConfig[] {
   if (raw === undefined || raw === null) return [];
@@ -23,6 +24,15 @@ function normalizeEntities(raw: unknown): EntityConfig[] {
   return entities.slice(0, MAX_ENTITIES);
 }
 
+function normalizePresence(raw: unknown): string[] {
+  if (raw === undefined || raw === null || raw === '') return [];
+  const list = Array.isArray(raw) ? raw : [raw];
+  if (!list.every((id) => typeof id === 'string')) {
+    throw new Error('"presence_entity" must be an entity id or a list of entity ids');
+  }
+  return list.filter(Boolean);
+}
+
 /** Validate a user config and merge it with the defaults. Throws a readable Error when invalid. */
 export function normalizeConfig(config: Partial<AreaControlCardConfig>): AreaControlCardConfig {
   if (!config || typeof config !== 'object') {
@@ -35,9 +45,17 @@ export function normalizeConfig(config: Partial<AreaControlCardConfig>): AreaCon
     );
   }
 
+  let roomType = config.room_type;
+  if (roomType && roomType !== 'auto' && roomType !== 'none' && !isRoomType(roomType)) {
+    console.warn(`[area-control-card] Unknown room_type "${roomType}", using "auto"`);
+    roomType = 'auto';
+  }
+
   return {
     ...DEFAULT_CONFIG,
     ...config,
+    room_type: roomType ?? DEFAULT_CONFIG.room_type,
     entities: normalizeEntities(config.entities),
+    presence_entities: normalizePresence(config.presence_entity),
   } as AreaControlCardConfig;
 }

@@ -16,10 +16,15 @@
     "hold_action": "Hold Action",
     "double_tap_action": "Double Tap Action",
     "card_icon": "Card Icon",
-    "visual_priority": "Priority: Icon → Image URL → Area Picture → Gradient",
+    "visual_priority": "Priority: Icon → Image URL → Room Scene (chosen) → Area Picture → Room Scene (auto) → Area Icon → Gradient",
     "move_up": "Move up",
     "move_down": "Move down",
-    "unpin_entity": "Remove from card"
+    "unpin_entity": "Remove from card",
+    "room_type": "Room Scene",
+    "room_type_auto": "Auto (from area icon or name)",
+    "room_type_none": "None",
+    "presence_sensors": "Motion / presence sensors",
+    "presence_hint": "The card comes alive while any of these sensors detects motion."
   },
   "card": {
     "occupied": "Occupied",
@@ -34,5 +39,15 @@
     "lavender": "Lavender",
     "amber": "Amber",
     "slate": "Slate"
+  },
+  "room": {
+    "living": "Living room",
+    "bedroom": "Bedroom",
+    "kitchen": "Kitchen",
+    "bathroom": "Bathroom",
+    "office": "Office",
+    "kids": "Kids room",
+    "dining": "Dining room",
+    "outdoor": "Garden"
   }
 }

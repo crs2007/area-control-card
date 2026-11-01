@@ -147,19 +147,51 @@ export const cardStyles = css`
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at 40% 60%, var(--acc-accent), var(--acc-primary));
+    background:
+      radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.55), transparent 42%),
+      conic-gradient(
+        from 210deg at 45% 55%,
+        var(--acc-primary),
+        var(--acc-accent),
+        var(--acc-primary),
+        var(--acc-accent),
+        var(--acc-primary)
+      );
     border-radius: 50%;
     opacity: 0.95;
     color: rgba(255, 255, 255, 0.95);
+    box-shadow: inset 0 -10px 24px rgba(0, 0, 0, 0.18);
     transition: opacity 0.3s ease;
   }
 
   .bottom-visual.icon-visual ha-icon {
     --mdc-icon-size: 64px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
   }
 
-  .bottom-visual.icon-visual.animated {
-    animation: iconBreathe 3s ease-in-out infinite;
+  /* Motion ripples around the icon badge */
+  .bottom-visual.icon-visual::before,
+  .bottom-visual.icon-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--acc-accent);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .bottom-visual.icon-visual.animated::before,
+  .bottom-visual.icon-visual.animated::after {
+    animation: iconRipple 2.8s ease-out infinite;
+  }
+
+  .bottom-visual.icon-visual.animated::after {
+    animation-delay: 1.4s;
+  }
+
+  .bottom-visual.icon-visual.animated ha-icon {
+    animation: iconWiggle 2.4s ease-in-out infinite;
   }
 
   .bottom-visual.image-visual {
@@ -212,9 +244,9 @@ export const cardStyles = css`
   }
 
   .chip.active {
-    background: var(--acc-primary);
+    background: var(--chip-color, var(--acc-primary));
     border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 12px var(--acc-glow-active);
+    box-shadow: 0 0 12px var(--chip-glow, var(--acc-glow-active));
     animation: chipGlow 2s ease-in-out infinite;
   }
 
@@ -248,8 +280,21 @@ export const cardStyles = css`
     color: var(--disabled-text-color, #999);
   }
 
-  .chip.active .icon-spin {
-    animation: iconSpin 3s linear infinite;
+  /* Per-domain icon animations while active */
+  .chip.active.d-light ha-icon {
+    animation: chipBulb 2.4s ease-in-out infinite;
+  }
+
+  .chip.active.d-fan ha-icon {
+    animation: iconSpin 1.6s linear infinite;
+  }
+
+  .chip.active.d-media_player ha-icon {
+    animation: chipBeat 1.2s ease-in-out infinite;
+  }
+
+  .chip.active.d-climate ha-icon {
+    animation: chipFloat 2.2s ease-in-out infinite;
   }
 
   /* Animations */
@@ -270,10 +315,40 @@ export const cardStyles = css`
   @keyframes chipGlow {
     0%,
     100% {
-      box-shadow: 0 0 12px var(--acc-glow-active);
+      box-shadow: 0 0 12px var(--chip-glow, var(--acc-glow-active));
     }
     50% {
-      box-shadow: 0 0 20px var(--acc-glow-active);
+      box-shadow: 0 0 20px var(--chip-glow, var(--acc-glow-active));
+    }
+  }
+
+  @keyframes chipBulb {
+    0%,
+    100% {
+      filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.6));
+    }
+    50% {
+      filter: drop-shadow(0 0 5px rgba(255, 248, 208, 0.95));
+    }
+  }
+
+  @keyframes chipBeat {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.12);
+    }
+  }
+
+  @keyframes chipFloat {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-1.5px);
     }
   }
 
@@ -289,13 +364,30 @@ export const cardStyles = css`
     }
   }
 
-  @keyframes iconBreathe {
+  @keyframes iconRipple {
+    0% {
+      opacity: 0.6;
+      transform: scale(0.95);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.35);
+    }
+  }
+
+  @keyframes iconWiggle {
     0%,
     100% {
-      transform: scale(1);
+      transform: rotate(0) scale(1);
     }
-    50% {
-      transform: scale(1.06);
+    15% {
+      transform: rotate(-8deg) scale(1.06);
+    }
+    30% {
+      transform: rotate(6deg) scale(1.06);
+    }
+    45% {
+      transform: rotate(0) scale(1);
     }
   }
 
@@ -322,11 +414,8 @@ export const cardStyles = css`
   }
 
   @keyframes iconSpin {
-    from {
-      transform: rotateY(0deg);
-    }
     to {
-      transform: rotateY(360deg);
+      transform: rotate(360deg);
     }
   }
 
@@ -334,11 +423,13 @@ export const cardStyles = css`
   @media (prefers-reduced-motion: reduce) {
     .card.occupied,
     .chip.active,
+    .chip.active ha-icon,
     .gradient-blob.animated,
-    .bottom-visual.icon-visual.animated,
+    .bottom-visual.icon-visual.animated::before,
+    .bottom-visual.icon-visual.animated::after,
+    .bottom-visual.icon-visual.animated ha-icon,
     .bottom-visual.image-visual.animated img,
-    .presence-badge,
-    .chip.active .icon-spin {
+    .presence-badge {
       animation: none !important;
     }
   }
@@ -468,6 +559,12 @@ export const editorStyles = css`
     padding: 0;
     line-height: 1;
     font-size: 14px;
+    color: var(--secondary-text-color);
+  }
+
+  .hint {
+    font-size: 12px;
+    margin: 4px 0 0;
     color: var(--secondary-text-color);
   }
 

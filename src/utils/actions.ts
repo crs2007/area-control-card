@@ -29,7 +29,7 @@ export function resolveActions(
   config: AreaControlCardConfig,
   fallbackEntity?: string,
 ): ResolvedActions {
-  const entity = config.presence_entity || config.entities?.[0]?.entity || fallbackEntity;
+  const entity = config.presence_entities?.[0] || config.entities?.[0]?.entity || fallbackEntity;
 
   const resolve = (action: ActionConfig | undefined): ActionConfig => {
     let result = action;
