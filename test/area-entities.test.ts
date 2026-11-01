@@ -95,3 +95,19 @@ describe('getPresenceSensors', () => {
     expect(getPresenceSensors(hass, 'office')).toEqual(['binary_sensor.motion']);
   });
 });
+
+describe('discoverAreaEntities', () => {
+  it('caps the result at MAX_ENTITIES and keeps domain order', async () => {
+    const { discoverAreaEntities } = await import('../src/utils/area-entities');
+    const { MAX_ENTITIES } = await import('../src/const');
+    const hass = makeHass([
+      ...Array.from({ length: MAX_ENTITIES + 2 }, (_, i) =>
+        entry(`light.l${i}`, { area_id: 'office' }),
+      ),
+      entry('fan.f', { area_id: 'office' }),
+    ]);
+    const result = discoverAreaEntities(hass, 'office');
+    expect(result).toHaveLength(MAX_ENTITIES);
+    expect(result[0]).toEqual({ entity: 'light.l0' });
+  });
+});

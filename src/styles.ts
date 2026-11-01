@@ -9,8 +9,15 @@ export const cardStyles = css`
     --acc-background-tint: rgba(7, 100, 250, 0.08);
   }
 
+  ha-card {
+    display: block;
+    height: 100%;
+    container-type: inline-size;
+  }
+
   .card {
     position: relative;
+    height: 100%;
     min-height: 230px;
     border-radius: 16px;
     padding: 20px;
@@ -18,7 +25,7 @@ export const cardStyles = css`
     background: var(--ha-card-background, var(--card-background-color, #fff));
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--ha-card-border-color, var(--divider-color, rgba(128, 128, 128, 0.2)));
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
     transition: box-shadow 0.3s ease;
     display: grid;
@@ -132,7 +139,8 @@ export const cardStyles = css`
     height: 130px;
     overflow: visible;
     pointer-events: none;
-    margin: 0 0 -20px -20px;
+    margin-block-end: -20px;
+    margin-inline-start: -20px;
   }
 
   .bottom-visual.icon-visual {

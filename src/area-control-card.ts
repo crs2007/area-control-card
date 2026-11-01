@@ -1,14 +1,7 @@
 import { LitElement, html, nothing, PropertyValues, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { AreaControlCardConfig, HomeAssistant } from './types';
-import {
-  CARD_TAG,
-  EDITOR_TAG,
-  CARD_VERSION,
-  DEFAULT_CONFIG,
-  DOMAIN_ICONS,
-  MAX_ENTITIES,
-} from './const';
+import { AreaControlCardConfig, EntityConfig, HomeAssistant } from './types';
+import { CARD_TAG, EDITOR_TAG, CARD_VERSION, DEFAULT_CONFIG, DOMAIN_ICONS } from './const';
 import { applyColorVariables } from './utils/colors';
 import {
   getDomain,
@@ -17,7 +10,8 @@ import {
   toggleEntity,
   fireEvent,
 } from './utils/ha-helpers';
-import { getAreaEntitiesByDomain } from './utils/area-entities';
+import { discoverAreaEntities } from './utils/area-entities';
+import { hassChangedForCard } from './utils/should-update';
 import { localize } from './utils/localize';
 import { normalizeConfig } from './utils/config';
 import { ActionKind, ResolvedActions, hasAnyAction, resolveActions } from './utils/actions';
@@ -41,6 +35,13 @@ export class AreaControlCard extends LitElement {
   @state() private _config!: AreaControlCardConfig;
 
   private _actions!: ResolvedActions;
+  private _watched: string[] = [];
+  private _discovery?: {
+    entities: HomeAssistant['entities'];
+    devices: HomeAssistant['devices'];
+    areaId: string;
+    result: EntityConfig[];
+  };
   private _gesture = new ActionGesture(
     (kind) => this._runAction(kind),
     (kind) => this._actions?.[`${kind}_action`]?.action !== 'none',
@@ -71,6 +72,37 @@ export class AreaControlCard extends LitElement {
 
   public getCardSize(): number {
     return 3;
+  }
+
+  // Sections view (HA 2024.8+)
+  public getGridOptions() {
+    return { columns: 6, rows: 3, min_columns: 4, min_rows: 2 };
+  }
+
+  protected shouldUpdate(changedProps: PropertyValues): boolean {
+    if (!changedProps.has('hass') || changedProps.size > 1 || !this._config) return true;
+    return hassChangedForCard(
+      changedProps.get('hass') as HomeAssistant | undefined,
+      this.hass,
+      this._watched,
+    );
+  }
+
+  /** The registries only change on registry updates, so cache discovery between state changes. */
+  private _discover(areaId: string): EntityConfig[] {
+    const { entities, devices } = this.hass;
+    const cache = this._discovery;
+    if (
+      cache &&
+      cache.entities === entities &&
+      cache.devices === devices &&
+      cache.areaId === areaId
+    ) {
+      return cache.result;
+    }
+    const result = discoverAreaEntities(this.hass, areaId);
+    this._discovery = { entities, devices, areaId, result };
+    return result;
   }
 
   protected updated(changedProps: PropertyValues): void {
@@ -105,17 +137,10 @@ export class AreaControlCard extends LitElement {
 
     // Auto-discover entities from area when none are manually pinned
     if (entities.length === 0 && areaId) {
-      const grouped = getAreaEntitiesByDomain(this.hass, areaId);
-      const discovered: { entity: string }[] = [];
-      for (const entityIds of Object.values(grouped)) {
-        for (const entityId of entityIds) {
-          if (discovered.length >= MAX_ENTITIES) break;
-          discovered.push({ entity: entityId });
-        }
-        if (discovered.length >= MAX_ENTITIES) break;
-      }
-      entities = discovered;
+      entities = this._discover(areaId);
     }
+
+    this._watched = [...entities.map((e) => e.entity), ...(presenceEntity ? [presenceEntity] : [])];
 
     // Entity-less actions (navigate) work as configured; more-info falls back to what is shown
     this._actions = resolveActions(this._config, entities[0]?.entity);

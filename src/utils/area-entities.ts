@@ -1,5 +1,5 @@
-import { HomeAssistant } from '../types';
-import { SUPPORTED_DOMAINS, PRESENCE_DEVICE_CLASSES } from '../const';
+import { EntityConfig, HomeAssistant } from '../types';
+import { MAX_ENTITIES, SUPPORTED_DOMAINS, PRESENCE_DEVICE_CLASSES } from '../const';
 import { getDomain } from './ha-helpers';
 
 export function getAreaEntities(hass: HomeAssistant, areaId: string): string[] {
@@ -33,6 +33,14 @@ export function getAreaEntitiesByDomain(
   }
 
   return grouped;
+}
+
+/** Entities to show when none are pinned: supported domains in order, capped at MAX_ENTITIES. */
+export function discoverAreaEntities(hass: HomeAssistant, areaId: string): EntityConfig[] {
+  return Object.values(getAreaEntitiesByDomain(hass, areaId))
+    .flat()
+    .slice(0, MAX_ENTITIES)
+    .map((entity) => ({ entity }));
 }
 
 export function isPresenceSensor(attributes: { device_class?: unknown } | undefined): boolean {
