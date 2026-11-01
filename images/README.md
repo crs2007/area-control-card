@@ -1,20 +1,23 @@
-# Screenshot Placeholders
+# Screenshots
 
-Add the following screenshots (PNG recommended, ~600px wide) to this directory:
+Screenshots used by the main README (HA dark theme, 2× scale, cropped to the cards):
 
 | Filename | Description |
 |:---|:---|
-| `card-preview.png` | Hero image — dashboard with multiple cards in different color themes |
-| `card-active.png` | Single card with some entities toggled ON (active chips glowing) |
-| `card-inactive.png` | Single card with all entities OFF (inactive chips visible) |
-| `card-occupied.png` | Single card with presence detected (pulsing badge, border glow) |
-| `color-themes.png` | Side-by-side view of all 6 color presets (ocean, sunset, forest, lavender, amber, slate) |
-| `visual-editor.png` | The card's GUI configuration editor in HA |
-| `entity-chips.png` | Close-up showing the 3 chip states: active, inactive, unavailable |
-| `presence-clear.png` | Card in "Clear" state (no presence detected) |
-| `presence-occupied.png` | Card in "Occupied" state (presence detected, animations visible) |
+| `card-preview.png` | Hero image — living room, kitchen and kids room scenes in three color themes |
+| `room-scenes.png` | All 8 room scenes with motion detected |
+| `card-active.png` | Single card with devices ON (colored chips, lit lamp) |
+| `card-inactive.png` | Single card with every device OFF |
+| `card-occupied.png` | Single card with motion detected (presence badge, animated scene) |
+| `color-themes.png` | The living room scene in all 6 color presets |
+| `entity-chips.png` | The 3 chip states: active, inactive, unavailable |
+| `presence-clear.png` | Bedroom card in the "Clear" state |
+| `presence-occupied.png` | Bedroom card in the "Occupied" state |
 
-**Tips:**
-- Use HA dark theme for consistency
-- Crop to card boundaries (no browser chrome)
-- Recommended width: 400–600px per card
+Still missing:
+
+| Filename | Description |
+|:---|:---|
+| `visual-editor.png` | The card's GUI configuration editor in HA |
+
+The README links these files by absolute `raw.githubusercontent.com` URLs so they also show in HACS.
