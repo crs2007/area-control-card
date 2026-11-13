@@ -29,7 +29,8 @@ export const cardStyles = css`
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
     transition: box-shadow 0.3s ease;
     display: grid;
-    grid-template-columns: 1fr auto;
+    /* minmax(0, ...) so a wide room scene can't push the chips/state column out of the card */
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: auto 1fr;
     gap: 0;
     box-sizing: border-box;
@@ -452,6 +453,53 @@ export const cardStyles = css`
     .gradient-blob {
       width: 100px;
       height: 90px;
+    }
+  }
+
+  /* Phone-width cards (two per row on mobile) */
+  @container (max-width: 220px) {
+    .card {
+      padding: 14px;
+      min-height: 200px;
+    }
+
+    .room-name {
+      font-size: 18px;
+    }
+
+    .chips-container {
+      grid-template-columns: 32px;
+      gap: 5px;
+      margin-inline-start: 8px;
+    }
+
+    .chip {
+      width: 32px;
+      height: 32px;
+    }
+
+    .chip ha-icon {
+      --mdc-icon-size: 18px;
+    }
+
+    .room-state {
+      font-size: 12px;
+    }
+
+    .bottom-visual {
+      width: 84px;
+      height: 76px;
+      margin-block-end: -14px;
+      margin-inline-start: -14px;
+    }
+
+    .bottom-visual.icon-visual ha-icon {
+      --mdc-icon-size: 40px;
+    }
+
+    .presence-badge {
+      top: 8px;
+      inset-inline-end: 8px;
     }
   }
 `;

@@ -2,7 +2,7 @@ import { ColorPalette, ColorPreset, AreaControlCardConfig, RoomType } from './ty
 
 export const CARD_TAG = 'area-control-card';
 export const EDITOR_TAG = 'area-control-card-editor';
-export const CARD_VERSION = '2026.11.01.2';
+export const CARD_VERSION = '2026.11.13.0';
 
 export const MAX_ENTITIES = 8;
 

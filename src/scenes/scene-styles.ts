@@ -10,12 +10,21 @@ import { css } from 'lit';
  */
 export const sceneStyles = css`
   .bottom-visual.scene-visual {
-    width: 208px;
-    height: 156px;
+    /* Scale with the card (cqi = % of ha-card's width) so narrow mobile cards keep room for chips */
+    width: clamp(96px, 62cqi, 208px);
+    height: auto;
+    aspect-ratio: 4 / 3;
     margin-block-end: -14px;
     margin-inline-start: -12px;
     filter: saturate(0.7);
     transition: filter 0.6s ease;
+  }
+
+  @container (max-width: 220px) {
+    .bottom-visual.scene-visual {
+      margin-block-end: -10px;
+      margin-inline-start: -8px;
+    }
   }
 
   .scene-visual.motion,
